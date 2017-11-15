@@ -260,7 +260,7 @@ void TwoWire::onRequest( void (*function)(void) )
   user_onRequest = function;
 }
 
-void pullup(bool Activate) {
+void TwoWire::pullup(bool Activate) {
   if (Activate == true) {
     digitalWrite(SDA, 1);
     digitalWrite(SCL, 1);

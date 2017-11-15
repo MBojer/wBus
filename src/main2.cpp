@@ -8,7 +8,7 @@ unsigned int Counter;
 
 String I2C_Receive_Data;
 
-int I2C_Address;
+int I2C_Address = 12;
 
 int I2C_BUS_Responce;
 
@@ -52,13 +52,16 @@ void I2C_Receive(int HowMany) {
 
 void setup() {
 
-    Wire.begin(I2C_Address);
-    TWAR = (I2C_Address << 1) | 1;
-    Wire.onReceive(I2C_Receive);
+	// Wire.pullup(true);
+
+  Wire.begin(I2C_Address);
+  TWAR = (I2C_Address << 1) | 1;
+  Wire.onReceive(I2C_Receive);
 
   Serial.begin(115200);
   Serial.println("Boot Start");
   Serial.println("Boot Done");
+	Broadcast("Mega2 Boot Done");
 }
 
 void loop() {
@@ -66,12 +69,20 @@ void loop() {
   Serial.println("Counter: " + String(Counter));
 
 
-  if (I2C_Receive_Data != "") {
-    Serial.println("Reviced: " + I2C_Receive_Data);
+  if (I2C_Receive_Data == "DD") {
+    Broadcast("DX");
+    Serial.println("DX");
     I2C_Receive_Data = "";
   }
 
+  else if (I2C_Receive_Data != "") {
+    Serial.println("Reviced: " + I2C_Receive_Data);
+		I2C_Receive_Data = "";
+  }
 
+	if (Counter % 7 == 0) {
+		Broadcast("Mega2: " + String(Counter));
+	}
 
 
 
