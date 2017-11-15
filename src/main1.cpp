@@ -52,11 +52,11 @@ void I2C_Receive(int HowMany) {
 
 void setup() {
 
-	// Wire.pullup(true);
+	Wire.begin(I2C_Address);
+	TWAR = (I2C_Address << 1) | 1;
+	Wire.onReceive(I2C_Receive);
+	Wire.pullup(true);
 
-  Wire.begin(I2C_Address);
-  TWAR = (I2C_Address << 1) | 1;
-  Wire.onReceive(I2C_Receive);
 
   Serial.begin(115200);
   Serial.println("Boot Start");
