@@ -25,6 +25,7 @@ extern "C" {
 }
 
 #include "WSWire.h"
+#include "Arduino.h"
 
 // Initialize Class Variables //////////////////////////////////////////////////
 
@@ -136,7 +137,7 @@ size_t TwoWire::write(uint8_t data)
     // put byte in tx buffer
     txBuffer[txBufferIndex] = data;
     ++txBufferIndex;
-    // update amount in buffer   
+    // update amount in buffer
     txBufferLength = txBufferIndex;
   }else{
   // in slave send mode
@@ -178,7 +179,7 @@ int TwoWire::available(void)
 int TwoWire::read(void)
 {
   int value = -1;
-  
+
   // get each successive byte on each call
   if(rxBufferIndex < rxBufferLength){
     value = rxBuffer[rxBufferIndex];
@@ -194,7 +195,7 @@ int TwoWire::read(void)
 int TwoWire::peek(void)
 {
   int value = -1;
-  
+
   if(rxBufferIndex < rxBufferLength){
     value = rxBuffer[rxBufferIndex];
   }
@@ -223,7 +224,7 @@ void TwoWire::onReceiveService(uint8_t* inBytes, int numBytes)
   // copy twi rx buffer into local read buffer
   // this enables new reads to happen in parallel
   for(uint8_t i = 0; i < numBytes; ++i){
-    rxBuffer[i] = inBytes[i];    
+    rxBuffer[i] = inBytes[i];
   }
   // set rx iterator vars
   rxBufferIndex = 0;
@@ -259,7 +260,17 @@ void TwoWire::onRequest( void (*function)(void) )
   user_onRequest = function;
 }
 
+void pullup(bool Activate) {
+  if (Activate == true) {
+    digitalWrite(SDA, 1);
+    digitalWrite(SCL, 1);
+  }
+  else {
+    digitalWrite(SDA, 0);
+    digitalWrite(SCL, 0);
+  }
+}
+
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
 TwoWire Wire = TwoWire();
-
