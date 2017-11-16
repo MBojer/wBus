@@ -32,7 +32,7 @@ Network for made to run on the I2C bus using broadcast
       void begin(int);
       void beginTransmission(uint8_t);
       void beginTransmission(int);
-      void broadcast(String Broadcast_String);
+      int broadcast(String Broadcast_String);
       uint8_t endTransmission(void);
       uint8_t requestFrom(uint8_t, uint8_t);
       uint8_t requestFrom(int, int);

@@ -24,12 +24,16 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 
   _Device_ID = I2C_Device_ID;
   _I2C_Internal_Pullup = I2C_Internal_Pullup;
-  pullup(_I2C_Internal_Pullup);
 
   _Max_Queue_Length = Max_Queue_Length;
 
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
+
+  pullup(_I2C_Internal_Pullup); // Sets the PullUp Resistors
+  Device_ID_Check();
+
+
 
 } // End Marker for WBus
 
@@ -84,7 +88,7 @@ void WBus::beginTransmission(int address) {
   beginTransmission((uint8_t)address);
 }
 
-void WBus::broadcast(String Broadcast_String) {
+int WBus::broadcast(String Broadcast_String) {
 
 	/* ------------------------------ Broadcast ------------------------------
 	Version 0.1
@@ -93,19 +97,17 @@ void WBus::broadcast(String Broadcast_String) {
 
 	int I2C_BUS_Responce;
 
-	beginTransmission (0);  // broadcast to all
+	beginTransmission(0);  // broadcast to all
 	write(Broadcast_String.c_str());
 	I2C_BUS_Responce = endTransmission();
 
 	if (I2C_BUS_Responce == 0) { // REMOVE ME
 		Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
+    return 0;
 	} // REMOVE ME
 
-
-	if (I2C_BUS_Responce != 0) {
-		I2C_BUS_Error(I2C_BUS_Responce);
-	}
-
+	I2C_BUS_Error(I2C_BUS_Responce);
+  return I2C_BUS_Responce;
 
 } // End marker for Broadcast
 
@@ -280,18 +282,60 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
 
 int WBus::Device_ID_Check() {
 
-	String test_string = "1337"; // CHANGE ME
-	String I2C_BUS_Responce;
+  // return 1; // 1 = Check done and passed
+  // return 2; // 2 = Error
 
-	begin(100);
+	// broadcast(_Device_ID + "DD");
 
-	beginTransmission(100);  // broadcast to all
-	write(test_string.c_str());
-	I2C_BUS_Responce = endTransmission();
+  Serial.println(broadcast(_Device_ID + "DD"));
 
-	if (I2C_BUS_Responce != "") { // CHANGE ME
-		Serial.println(I2C_BUS_Responce);
-	}
+  // if (I2C_BUS_Responce == 0) {
+  //   Serial.println("WARNING: Device_ID_Check address in use");
+  //
+  //   for (int x = 1; x < 3; x++) {
+  //     delay(500);
+  //     beginTransmission(100);
+  //     write(1);
+  //     I2C_BUS_Responce = endTransmission();
+  //
+  //     if (I2C_BUS_Responce == 2) {
+  //       Serial.println("MARKER: Address ok");
+  //       break;
+  //     }
+  //
+  //     else if (I2C_BUS_Responce == 6) {
+  //       Serial.println("ERROR: I2C Bus wires not connected");
+  //       return 2;
+  //     }
+  //   }
+  // } // End Marker - if (I2C_BUS_Responce == 0)
+  //
+  // else if (I2C_BUS_Responce == 2) {
+  //   Serial.println("INFO: I2C Bus Address FREE"); // REMOVE ME
+  // }
+  //
+  // else if (I2C_BUS_Responce == 6) {
+  //   Serial.println("ERROR: I2C Bus wires not connected");
+  //   return 2;
+  // }
+
+Serial.println("MARKER: after"); // REMOVE ME
+
+
+  //
+  //
+	// begin(100);
+  //
+  //
+  //
+	// if (I2C_BUS_Responce == 0) { // CHANGE ME
+	// 	Serial.println("MARKER: Address In Use");
+	// }
+  //
+  // else {
+  //   Serial.println("MARKER: Address FREE");
+  //
+  // }
 
 	return 1;
   //
@@ -530,6 +574,7 @@ void WBus::Boot_Message() { // Displays a boot message if included
 
 		Serial.println("");
 		Serial.println("Including wBus v0.1");
+		Serial.println("Using BUS Address: " + String(_Device_ID));
 
 	}
 } // End marker for Boot_Message
