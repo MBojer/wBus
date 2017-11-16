@@ -20,7 +20,7 @@ public:
 
   int Device_ID_Check();
 
-  void I2C_BUS_Error(int Error_Number);
+  void I2C_BUS_Error(int Error_Number);  
 
   void Broadcast(String Broadcast_String);
 
