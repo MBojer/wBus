@@ -31,8 +31,8 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 	_Serial_Speed = Serial_Speed;
 
   pullup(_I2C_Internal_Pullup); // Sets the PullUp Resistors
-  
 
+  begin(_Device_ID);
 
 
 } // End Marker for WBus
