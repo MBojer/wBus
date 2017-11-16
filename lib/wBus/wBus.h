@@ -22,7 +22,7 @@ Network for made to run on the I2C bus using broadcast
 
       // --------------------------------------------- Setup ---------------------------------------------
 
-      WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
+      WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed, int Loop_Delay);
 
 
       // --------------------------------------------- Wire Functions ---------------------------------------------
@@ -72,7 +72,7 @@ Network for made to run on the I2C bus using broadcast
 
       void Boot_Message();
       void Blink_LED(int Number_Of_Blinks, int LED_Pin = 13);
-
+      int _Script_Loop_Delay = false;
 
 
 
@@ -97,6 +97,7 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- I2C Bus ---------------------------------------------
       int _Device_ID;
       bool _I2C_Internal_Pullup;
+      bool _I2C_Bus_Error = false; // 0 = OK  -  1 = Error
 
 
       // --------------------------------------------- Serial ---------------------------------------------
@@ -105,7 +106,10 @@ Network for made to run on the I2C bus using broadcast
 
 
       // --------------------------------------------- Device ID Checkd ---------------------------------------------
-      int _Device_ID_Check_OK = 0;
+      int _Device_ID_Check_OK = 0; // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+      int _Device_ID_Check_OK_Counter; // Used for Device ID check at boot to make sure the other device have time to send
+      // int _Queue_Device_ID_Check_Hit = false; // Look below int defined there just here as a reminder
+      bool _Queue_Device_ID_Check_Hit;
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------

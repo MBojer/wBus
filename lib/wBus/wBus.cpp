@@ -20,7 +20,7 @@ extern "C" {
 
 // --------------------------------------------- Setup ---------------------------------------------
 
-WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
+WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed, int Loop_Delay) {
 
   _Device_ID = I2C_Device_ID;
   _I2C_Internal_Pullup = I2C_Internal_Pullup;
@@ -30,10 +30,13 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
 
+  _Script_Loop_Delay = Loop_Delay;
+
   pullup(_I2C_Internal_Pullup); // Sets the PullUp Resistors
 
   begin(_Device_ID);
 
+  Device_ID_Check();
 
 } // End Marker for WBus
 
@@ -282,16 +285,86 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
 
 int WBus::Device_ID_Check() {
 
-  // return 1; // 1 = Check done and passed
-  // return 2; // 2 = Error
+  /*
+        0 = Not Done
+        1 = Check done and passed
+        2 = Error
+        3 = Waiting for reply
+  */
 
-	// broadcast(_Device_ID + "DD");
+  Serial.println("Device_ID_Check"); // REMOVE ME
+
+  if (_Device_ID_Check_OK == 0) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+    broadcast(String(_Device_ID) + "DD");
+    _Device_ID_Check_OK = 3;
+    return 3;
+  }
+
+  if (_Device_ID_Check_OK == 1) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+
+    if (_Queue_Device_ID_Check_Hit == true) {
+      /*
+          Command_Queue_Push have put *"DD" (Device ID check request) in the Queue
+          checking if the device id matches the units and if so replied *"DX"
+          *"DX" will make the other device enter error state and change ID to "110"
+      */
+
+      if (Queue_Search_Pop(String(String(_Device_ID) + "DD"), true) != ";") {
+        broadcast(String(_Device_ID) + "DX");
+        // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
+        _Queue_Device_ID_Check_Hit = false;
+        return 1;
+      } // Hit ducplicate device id found
+
+      else {
+        Queue_Search_Pop(String(String(_Device_ID) + "DD"), true);
+        Queue_Search_Pop(String(String(_Device_ID) + "DX"), true);
+        _Queue_Device_ID_Check_Hit = false;
+        return 1;
+      } // Clear queue for Device ID requests
+    }
+
+    return 1;
+  }
+
+  if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+    _I2C_Bus_Error = true;
+    return 2;
+  }
+
+  if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+    _Device_ID_Check_OK_Counter++;
+
+    Serial.println("_Device_ID_Check_OK_Counter:" + String(_Device_ID_Check_OK_Counter++));
+
+    if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
+      _I2C_Bus_Error = true;
+      _Device_ID_Check_OK = 2;
+      return 2;
+    }
+
+    Serial.println((_Script_Loop_Delay % 10000)); // REMOVE ME
+    if (_Device_ID_Check_OK_Counter < _Script_Loop_Delay % 10000) { // Done no reply on "DD" assuming device id unique
+      Serial.println("MARKER 56789"); // CHANGE ME
+      _Device_ID_Check_OK = 1;
+      return 1;
+    }
+
+  }
 
 
 
-  broadcast("Mega1 Test");
 
-  Serial.println("test");
+
+
+  Serial.println("Device_ID_Check - End");
+
+  // return 1;
+
+
+
+
+/*
 
   // if (I2C_BUS_Responce == 0) {
   //   Serial.println("WARNING: Device_ID_Check address in use");
@@ -323,8 +396,6 @@ int WBus::Device_ID_Check() {
   //   return 2;
   // }
 
-Serial.println("MARKER: after"); // REMOVE ME
-
 
   //
   //
@@ -341,7 +412,7 @@ Serial.println("MARKER: after"); // REMOVE ME
   //
   // }
 
-	return 1;
+
   //
 	// if (_Device_ID_Check_OK == 0) { // Check not done
   //
@@ -376,6 +447,8 @@ Serial.println("MARKER: after"); // REMOVE ME
 	// }
   //
 	// return 2; // 2 = Error
+
+  */
 
 } // END MARKER - Device_ID
 
@@ -418,6 +491,10 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 // --------------------------------------------- Queue ---------------------------------------------
 
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
+
+  if (Push_String.indexOf(Push_String) <= 0) {
+    _Queue_Device_ID_Check_Hit = true;
+  }
 
 	if (_Queue_Is_Empthy == true) {
 		_Queue_String = Push_String + ";";
