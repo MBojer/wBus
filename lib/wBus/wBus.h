@@ -4,8 +4,8 @@ Version 0.1
 Network for made to run on the I2C bus using broadcast
 */
 
-#ifndef wBus_h
-  #define wBus_h 
+#ifndef WBus_h
+  #define WBus_h
 
   // From MWWire (WSWire)
 
@@ -18,7 +18,7 @@ Network for made to run on the I2C bus using broadcast
 
   #include "Arduino.h"
 
-  class wBus : public Stream {
+  class WBus : public Stream {
 
     public:
       // --------------------------------------------- From MBWire ---------------------------------------------
@@ -43,9 +43,9 @@ Network for made to run on the I2C bus using broadcast
 
        using Print::write; // Change ME / REMOVE ME
 
-      // --------------------------------------------- wBus ---------------------------------------------
+      // --------------------------------------------- WBus ---------------------------------------------
 
-      wBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
+      WBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
       void Boot_Message();
       int Device_ID_Check();
       void I2C_BUS_Error(int Error_Number);

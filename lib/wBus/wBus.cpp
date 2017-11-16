@@ -13,14 +13,14 @@ extern "C" {
 
 
 
-// --------------------------------------------- wBus ---------------------------------------------
+// --------------------------------------------- WBus ---------------------------------------------
 
 #include "Arduino.h"
-#include "wBus.h"
+#include "WBus.h"
 
-// --------------------------------------------- wBus ---------------------------------------------
+// --------------------------------------------- WBus ---------------------------------------------
 
-wBus::wBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
+WBus::WBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
 
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
@@ -29,29 +29,29 @@ wBus::wBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Ser
 
 	_Device_ID = I2C_Device_ID;
 
-} // End Marker for wBus
+} // End Marker for WBus
 
 // Initialize Class Variables //////////////////////////////////////////////////
 
-uint8_t wBus::rxBuffer[BUFFER_LENGTH];
-uint8_t wBus::rxBufferIndex = 0;
-uint8_t wBus::rxBufferLength = 0;
+uint8_t WBus::rxBuffer[BUFFER_LENGTH];
+uint8_t WBus::rxBufferIndex = 0;
+uint8_t WBus::rxBufferLength = 0;
 
-uint8_t wBus::txAddress = 0;
-uint8_t wBus::txBuffer[BUFFER_LENGTH];
-uint8_t wBus::txBufferIndex = 0;
-uint8_t wBus::txBufferLength = 0;
+uint8_t WBus::txAddress = 0;
+uint8_t WBus::txBuffer[BUFFER_LENGTH];
+uint8_t WBus::txBufferIndex = 0;
+uint8_t WBus::txBufferLength = 0;
 
-uint8_t wBus::transmitting = 0;
-void (*wBus::user_onRequest)(void);
-void (*wBus::user_onReceive)(int);
+uint8_t WBus::transmitting = 0;
+void (*WBus::user_onRequest)(void);
+void (*WBus::user_onReceive)(int);
 
 
 // --------------------------------------------- From MBWire ---------------------------------------------
 
 // Public Methods //////////////////////////////////////////////////////////////
 
-void wBus::begin(void)
+void WBus::begin(void)
 {
   rxBufferIndex = 0;
   rxBufferLength = 0;
@@ -62,7 +62,7 @@ void wBus::begin(void)
   twi_init();
 }
 
-void wBus::begin(uint8_t address)
+void WBus::begin(uint8_t address)
 {
   twi_setAddress(address);
   twi_attachSlaveTxEvent(onRequestService);
@@ -70,12 +70,12 @@ void wBus::begin(uint8_t address)
   begin();
 }
 
-void wBus::begin(int address)
+void WBus::begin(int address)
 {
   begin((uint8_t)address);
 }
 
-uint8_t wBus::requestFrom(uint8_t address, uint8_t quantity)
+uint8_t WBus::requestFrom(uint8_t address, uint8_t quantity)
 {
   // clamp to buffer length
   if(quantity > BUFFER_LENGTH){
@@ -90,12 +90,12 @@ uint8_t wBus::requestFrom(uint8_t address, uint8_t quantity)
   return read;
 }
 
-uint8_t wBus::requestFrom(int address, int quantity)
+uint8_t WBus::requestFrom(int address, int quantity)
 {
   return requestFrom((uint8_t)address, (uint8_t)quantity);
 }
 
-void wBus::beginTransmission(uint8_t address)
+void WBus::beginTransmission(uint8_t address)
 {
   // indicate that we are transmitting
   transmitting = 1;
@@ -106,12 +106,12 @@ void wBus::beginTransmission(uint8_t address)
   txBufferLength = 0;
 }
 
-void wBus::beginTransmission(int address)
+void WBus::beginTransmission(int address)
 {
   beginTransmission((uint8_t)address);
 }
 
-uint8_t wBus::endTransmission(void)
+uint8_t WBus::endTransmission(void)
 {
   // transmit buffer (blocking)
   int8_t ret = twi_writeTo(txAddress, txBuffer, txBufferLength, 1);
@@ -126,7 +126,7 @@ uint8_t wBus::endTransmission(void)
 // must be called in:
 // slave tx event callback
 // or after beginTransmission(address)
-size_t wBus::write(uint8_t data)
+size_t WBus::write(uint8_t data)
 {
   if(transmitting){
   // in master transmitter mode
@@ -151,7 +151,7 @@ size_t wBus::write(uint8_t data)
 // must be called in:
 // slave tx event callback
 // or after beginTransmission(address)
-size_t wBus::write(const uint8_t *data, size_t quantity)
+size_t WBus::write(const uint8_t *data, size_t quantity)
 {
   if(transmitting){
   // in master transmitter mode
@@ -169,7 +169,7 @@ size_t wBus::write(const uint8_t *data, size_t quantity)
 // must be called in:
 // slave rx event callback
 // or after requestFrom(address, numBytes)
-int wBus::available(void)
+int WBus::available(void)
 {
   return rxBufferLength - rxBufferIndex;
 }
@@ -177,7 +177,7 @@ int wBus::available(void)
 // must be called in:
 // slave rx event callback
 // or after requestFrom(address, numBytes)
-int wBus::read(void)
+int WBus::read(void)
 {
   int value = -1;
 
@@ -193,7 +193,7 @@ int wBus::read(void)
 // must be called in:
 // slave rx event callback
 // or after requestFrom(address, numBytes)
-int wBus::peek(void)
+int WBus::peek(void)
 {
   int value = -1;
 
@@ -204,13 +204,13 @@ int wBus::peek(void)
   return value;
 }
 
-void wBus::flush(void)
+void WBus::flush(void)
 {
   // XXX: to be implemented.
 }
 
 // behind the scenes function that is called when data is received
-void wBus::onReceiveService(uint8_t* inBytes, int numBytes)
+void WBus::onReceiveService(uint8_t* inBytes, int numBytes)
 {
   // don't bother if user hasn't registered a callback
   if(!user_onReceive){
@@ -235,7 +235,7 @@ void wBus::onReceiveService(uint8_t* inBytes, int numBytes)
 }
 
 // behind the scenes function that is called when data is requested
-void wBus::onRequestService(void)
+void WBus::onRequestService(void)
 {
   // don't bother if user hasn't registered a callback
   if(!user_onRequest){
@@ -250,18 +250,18 @@ void wBus::onRequestService(void)
 }
 
 // sets function called on slave write
-void wBus::onReceive( void (*function)(int) )
+void WBus::onReceive( void (*function)(int) )
 {
   user_onReceive = function;
 }
 
 // sets function called on slave read
-void wBus::onRequest( void (*function)(void) )
+void WBus::onRequest( void (*function)(void) )
 {
   user_onRequest = function;
 }
 
-void wBus::pullup(bool Activate) {
+void WBus::pullup(bool Activate) {
   if (Activate == true) {
     digitalWrite(SDA, 1);
     digitalWrite(SCL, 1);
@@ -273,10 +273,10 @@ void wBus::pullup(bool Activate) {
 }
 
 
-// --------------------------------------------- wBus ---------------------------------------------
+// --------------------------------------------- WBus ---------------------------------------------
 
 
-void wBus::Boot_Message() {
+void WBus::Boot_Message() {
 
 	if (_Log_To_Serial == true) {
 
@@ -285,14 +285,14 @@ void wBus::Boot_Message() {
 		}
 
 		Serial.println("");
-		Serial.println("Including wBus v0.2");
+		Serial.println("Including WBus v0.2");
 
 	}
 
 } // End marker for Boot_Message
 
 
-void wBus::I2C_BUS_Error(int Error_Number) {
+void WBus::I2C_BUS_Error(int Error_Number) {
 
 	if (Error_Number == 1) { // represents an Error not useing the address just to be safe
 		Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
@@ -327,7 +327,7 @@ void wBus::I2C_BUS_Error(int Error_Number) {
 } // End Marker - I2C_Error_Print
 
 
-int wBus::Device_ID_Check() {
+int WBus::Device_ID_Check() {
 
 	String test_string = "1337"; // CHANGE ME
 	String I2C_BUS_Responce;
@@ -382,7 +382,7 @@ int wBus::Device_ID_Check() {
 
 
 
-void wBus::Broadcast(String Broadcast_String) {
+void WBus::Broadcast(String Broadcast_String) {
 
 	/* ------------------------------ Broadcast ------------------------------
 	Version 0.1
@@ -409,7 +409,7 @@ void wBus::Broadcast(String Broadcast_String) {
 
 
 
-void wBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
+void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
 	if (_Queue_Is_Empthy == true) {
 		_Queue_String = Push_String + ";";
@@ -436,7 +436,7 @@ void wBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
 
 
-String wBus::Queue_Pop() {
+String WBus::Queue_Pop() {
 
 			String Pop_String;
 
@@ -470,7 +470,7 @@ String wBus::Queue_Pop() {
 
 
 
-String wBus::Queue_Peek() {
+String WBus::Queue_Peek() {
 
 			if (_Queue_String == ";") {
 				return ";";
@@ -484,25 +484,25 @@ String wBus::Queue_Peek() {
 
 
 
-String wBus::Queue_Peek_Queue() {
+String WBus::Queue_Peek_Queue() {
 			return _Queue_String;
 }
 
 
 
-int wBus::Queue_Length() {
+int WBus::Queue_Length() {
 			return _Queue_Length;
 }
 
 
 
-int wBus::Queue_Is_Empthy() {
+int WBus::Queue_Is_Empthy() {
 			return _Queue_Is_Empthy;
 }
 
 
 
-void wBus::Queue_Clear() {
+void WBus::Queue_Clear() {
 			_Queue_String = ";";
 			_Queue_Length = 0;
 			_Queue_Is_Empthy = true;
@@ -510,7 +510,7 @@ void wBus::Queue_Clear() {
 
 
 
-String wBus::Queue_Search_Peek(String Search_String) {
+String WBus::Queue_Search_Peek(String Search_String) {
 
 			if (_Queue_String.indexOf(Search_String) >= 0) {
 
@@ -531,7 +531,7 @@ String wBus::Queue_Search_Peek(String Search_String) {
 
 
 
-String wBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
+String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 			if (_Queue_String.indexOf(Search_String) >= 0) {
 
 				String Search_Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
@@ -574,7 +574,7 @@ String wBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
 
 
-void wBus::Error_Blink(int Number_Of_Blinks) {
+void WBus::Error_Blink(int Number_Of_Blinks) {
 
 			/* ------------------------------ Blink ------------------------------
 			Version 0.1

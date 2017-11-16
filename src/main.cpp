@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
-#include <MBWire.h>
-#include <wBus.h>
+#include <WBus.h>
 
 int Loop_Delay = 500;
 
@@ -13,7 +12,7 @@ int I2C_Address = 11;
 
 int I2C_BUS_Responce;
 
-
+WBus wBus(I2C_Address, 20, true, 115200);
 
 
 void Broadcast(String Broadcast_String) {
@@ -28,9 +27,9 @@ void Broadcast(String Broadcast_String) {
 
 	int I2C_BUS_Responce;
 
-	Wire.beginTransmission (0);  // broadcast to all
-	Wire.write(Broadcast_String.c_str());
-	I2C_BUS_Responce = Wire.endTransmission();
+	wBus.beginTransmission (0);  // broadcast to all
+	wBus.write(Broadcast_String.c_str());
+	I2C_BUS_Responce = wBus.endTransmission();
 
 	if (I2C_BUS_Responce == 0) { // REMOVE ME
 		Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
@@ -46,8 +45,8 @@ void Broadcast(String Broadcast_String) {
 
 void I2C_Receive(int HowMany) {
 
-  while (Wire.available()) {
-    I2C_Receive_Data += (char)Wire.read();
+  while (wBus.available()) {
+    I2C_Receive_Data += (char)wBus.read();
   }
 
 } //End marker for I2C_Receive
@@ -60,10 +59,10 @@ void setup() {
 	// wBus.Device_ID_Check();
 
 
-	Wire.begin(I2C_Address);
-	Wire.pullup(true);
+	wBus.begin(I2C_Address);
+	wBus.pullup(true);
 	TWAR = (I2C_Address << 1) | 1;
-	Wire.onReceive(I2C_Receive);
+	wBus.onReceive(I2C_Receive);
 
 
   Serial.println("Boot Done");
