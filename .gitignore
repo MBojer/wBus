@@ -6,6 +6,6 @@
 
 lib/readme.txt
 
-main.cpp
+src/main.cpp
 
 platformio.ini
