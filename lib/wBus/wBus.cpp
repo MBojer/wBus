@@ -522,7 +522,7 @@ String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
 void WBus::Boot_Message() { // Displays a boot message if included
 
-	if (_Log_To_Serial == true) {
+	if (_Log_To_Serial == true && (Serial)) {
 
 		if (_Serial_Speed != 0) {
 			Serial.begin(_Serial_Speed);
@@ -532,7 +532,6 @@ void WBus::Boot_Message() { // Displays a boot message if included
 		Serial.println("Including wBus v0.1");
 
 	}
-
 } // End marker for Boot_Message
 
 void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard LED to indicate errors
