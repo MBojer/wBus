@@ -287,7 +287,9 @@ int WBus::Device_ID_Check() {
 
 	// broadcast(_Device_ID + "DD");
 
-  Serial.println(broadcast(_Device_ID + "DD"));
+  begin(_Device_ID);
+
+  Serial.println("test");
 
   // if (I2C_BUS_Responce == 0) {
   //   Serial.println("WARNING: Device_ID_Check address in use");

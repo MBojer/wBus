@@ -44,7 +44,7 @@ void setup() {
 
 void loop() {
   Counter++;
-  Serial.println("Counter: " + String(Counter));
+  // Serial.println("Counter: " + String(Counter));
 
   if (I2C_Receive_Data != "") {
     Serial.println("Reviced: " + I2C_Receive_Data);
