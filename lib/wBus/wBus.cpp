@@ -1,9 +1,11 @@
 /*
-Version 0.2
+
+Version 0.1
+NOTE: Remember to change version number in Boot_Message
+
 */
 
-// --------------------------------------------- From MBWire ---------------------------------------------
-
+// --------------------------------------------- For TWI (Two Wire Interface) ---------------------------------------------
 extern "C" {
   #include <stdlib.h>
   #include <string.h>
@@ -11,27 +13,28 @@ extern "C" {
   #include "twi.h"
 }
 
-
-
 // --------------------------------------------- WBus ---------------------------------------------
 
 #include "Arduino.h"
 #include "WBus.h"
 
-// --------------------------------------------- WBus ---------------------------------------------
+// --------------------------------------------- Setup ---------------------------------------------
 
-WBus::WBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
+WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
+
+  _Device_ID = I2C_Device_ID;
+  _I2C_Internal_Pullup = I2C_Internal_Pullup;
+  pullup(_I2C_Internal_Pullup);
+
+  _Max_Queue_Length = Max_Queue_Length;
 
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
 
-	_Max_Queue_Length = Max_Queue_Length;
-
-	_Device_ID = I2C_Device_ID;
-
 } // End Marker for WBus
 
-// Initialize Class Variables //////////////////////////////////////////////////
+
+// --------------------------------------------- Two Wire Interface ---------------------------------------------
 
 uint8_t WBus::rxBuffer[BUFFER_LENGTH];
 uint8_t WBus::rxBufferIndex = 0;
@@ -46,13 +49,7 @@ uint8_t WBus::transmitting = 0;
 void (*WBus::user_onRequest)(void);
 void (*WBus::user_onReceive)(int);
 
-
-// --------------------------------------------- From MBWire ---------------------------------------------
-
-// Public Methods //////////////////////////////////////////////////////////////
-
-void WBus::begin(void)
-{
+void WBus::begin(void) {
   rxBufferIndex = 0;
   rxBufferLength = 0;
 
@@ -62,21 +59,68 @@ void WBus::begin(void)
   twi_init();
 }
 
-void WBus::begin(uint8_t address)
-{
+void WBus::begin(uint8_t address) {
   twi_setAddress(address);
   twi_attachSlaveTxEvent(onRequestService);
   twi_attachSlaveRxEvent(onReceiveService);
   begin();
 }
 
-void WBus::begin(int address)
-{
+void WBus::begin(int address) {
   begin((uint8_t)address);
 }
 
-uint8_t WBus::requestFrom(uint8_t address, uint8_t quantity)
-{
+void WBus::beginTransmission(uint8_t address) {
+  // indicate that we are transmitting
+  transmitting = 1;
+  // set address of targeted slave
+  txAddress = address;
+  // reset tx buffer iterator vars
+  txBufferIndex = 0;
+  txBufferLength = 0;
+}
+
+void WBus::beginTransmission(int address) {
+  beginTransmission((uint8_t)address);
+}
+
+void WBus::broadcast(String Broadcast_String) {
+
+	/* ------------------------------ Broadcast ------------------------------
+	Version 0.1
+	Broadcasts information to the I2C network
+	*/
+
+	int I2C_BUS_Responce;
+
+	beginTransmission (0);  // broadcast to all
+	write(Broadcast_String.c_str());
+	I2C_BUS_Responce = endTransmission();
+
+	if (I2C_BUS_Responce == 0) { // REMOVE ME
+		Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
+	} // REMOVE ME
+
+
+	if (I2C_BUS_Responce != 0) {
+		I2C_BUS_Error(I2C_BUS_Responce);
+	}
+
+
+} // End marker for Broadcast
+
+uint8_t WBus::endTransmission(void) {
+  // transmit buffer (blocking)
+  int8_t ret = twi_writeTo(txAddress, txBuffer, txBufferLength, 1);
+  // reset tx buffer iterator vars
+  txBufferIndex = 0;
+  txBufferLength = 0;
+  // indicate that we are done transmitting
+  transmitting = 0;
+  return ret;
+}
+
+uint8_t WBus::requestFrom(uint8_t address, uint8_t quantity) {
   // clamp to buffer length
   if(quantity > BUFFER_LENGTH){
     quantity = BUFFER_LENGTH;
@@ -90,44 +134,14 @@ uint8_t WBus::requestFrom(uint8_t address, uint8_t quantity)
   return read;
 }
 
-uint8_t WBus::requestFrom(int address, int quantity)
-{
+uint8_t WBus::requestFrom(int address, int quantity) {
   return requestFrom((uint8_t)address, (uint8_t)quantity);
 }
 
-void WBus::beginTransmission(uint8_t address)
-{
-  // indicate that we are transmitting
-  transmitting = 1;
-  // set address of targeted slave
-  txAddress = address;
-  // reset tx buffer iterator vars
-  txBufferIndex = 0;
-  txBufferLength = 0;
-}
-
-void WBus::beginTransmission(int address)
-{
-  beginTransmission((uint8_t)address);
-}
-
-uint8_t WBus::endTransmission(void)
-{
-  // transmit buffer (blocking)
-  int8_t ret = twi_writeTo(txAddress, txBuffer, txBufferLength, 1);
-  // reset tx buffer iterator vars
-  txBufferIndex = 0;
-  txBufferLength = 0;
-  // indicate that we are done transmitting
-  transmitting = 0;
-  return ret;
-}
-
-// must be called in:
-// slave tx event callback
-// or after beginTransmission(address)
-size_t WBus::write(uint8_t data)
-{
+size_t WBus::write(uint8_t data) {
+  // must be called in:
+  // slave tx event callback
+  // or after beginTransmission(address)
   if(transmitting){
   // in master transmitter mode
     // don't bother if buffer is full
@@ -148,11 +162,10 @@ size_t WBus::write(uint8_t data)
   return 1;
 }
 
-// must be called in:
-// slave tx event callback
-// or after beginTransmission(address)
-size_t WBus::write(const uint8_t *data, size_t quantity)
-{
+size_t WBus::write(const uint8_t *data, size_t quantity) {
+  // must be called in:
+  // slave tx event callback
+  // or after beginTransmission(address)
   if(transmitting){
   // in master transmitter mode
     for(size_t i = 0; i < quantity; ++i){
@@ -166,19 +179,14 @@ size_t WBus::write(const uint8_t *data, size_t quantity)
   return quantity;
 }
 
-// must be called in:
-// slave rx event callback
-// or after requestFrom(address, numBytes)
-int WBus::available(void)
-{
+int WBus::available(void) {
+  // must be called in:
+  // slave rx event callback
+  // or after requestFrom(address, numBytes)
   return rxBufferLength - rxBufferIndex;
 }
 
-// must be called in:
-// slave rx event callback
-// or after requestFrom(address, numBytes)
-int WBus::read(void)
-{
+int WBus::read(void) {
   int value = -1;
 
   // get each successive byte on each call
@@ -190,11 +198,10 @@ int WBus::read(void)
   return value;
 }
 
-// must be called in:
-// slave rx event callback
-// or after requestFrom(address, numBytes)
-int WBus::peek(void)
-{
+int WBus::peek(void) {
+  // must be called in:
+  // slave rx event callback
+  // or after requestFrom(address, numBytes)
   int value = -1;
 
   if(rxBufferIndex < rxBufferLength){
@@ -204,14 +211,17 @@ int WBus::peek(void)
   return value;
 }
 
-void WBus::flush(void)
-{
+void WBus::flush(void) {
   // XXX: to be implemented.
 }
 
-// behind the scenes function that is called when data is received
-void WBus::onReceiveService(uint8_t* inBytes, int numBytes)
-{
+void WBus::onReceive( void (*function)(int) ) {
+  // sets function called on slave write
+  user_onReceive = function;
+}
+
+void WBus::onReceiveService(uint8_t* inBytes, int numBytes) {
+  // behind the scenes function that is called when data is received
   // don't bother if user hasn't registered a callback
   if(!user_onReceive){
     return;
@@ -234,9 +244,13 @@ void WBus::onReceiveService(uint8_t* inBytes, int numBytes)
   user_onReceive(numBytes);
 }
 
-// behind the scenes function that is called when data is requested
-void WBus::onRequestService(void)
-{
+void WBus::onRequest( void (*function)(void) ) {
+  // sets function called on slave read
+  user_onRequest = function;
+}
+
+void WBus::onRequestService(void) {
+  // behind the scenes function that is called when data is requested
   // don't bother if user hasn't registered a callback
   if(!user_onRequest){
     return;
@@ -249,19 +263,7 @@ void WBus::onRequestService(void)
   user_onRequest();
 }
 
-// sets function called on slave write
-void WBus::onReceive( void (*function)(int) )
-{
-  user_onReceive = function;
-}
-
-// sets function called on slave read
-void WBus::onRequest( void (*function)(void) )
-{
-  user_onRequest = function;
-}
-
-void WBus::pullup(bool Activate) {
+void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
   if (Activate == true) {
     digitalWrite(SDA, 1);
     digitalWrite(SCL, 1);
@@ -273,59 +275,8 @@ void WBus::pullup(bool Activate) {
 }
 
 
+
 // --------------------------------------------- WBus ---------------------------------------------
-
-
-void WBus::Boot_Message() {
-
-	if (_Log_To_Serial == true) {
-
-		if (_Serial_Speed != 0) {
-			Serial.begin(_Serial_Speed);
-		}
-
-		Serial.println("");
-		Serial.println("Including WBus v0.2");
-
-	}
-
-} // End marker for Boot_Message
-
-
-void WBus::I2C_BUS_Error(int Error_Number) {
-
-	if (Error_Number == 1) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
-	}
-
-	else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 2: Received NACK on transmit of address");
-	}
-
-	else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 3: Received NACK on transmit of data");
-	}
-
-	else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
-		Serial.println(String("I2C BUS error on address: ") + String(_Device_ID));
-	}
-
-	else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master");
-	}
-
-	else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent");
-	}
-
-	else { // Above 6 is reserved for later errors
-		Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
-	}
-
-	return;
-
-} // End Marker - I2C_Error_Print
-
 
 int WBus::Device_ID_Check() {
 
@@ -380,34 +331,43 @@ int WBus::Device_ID_Check() {
 
 } // END MARKER - Device_ID
 
+void WBus::I2C_BUS_Error(int Error_Number) {
 
-
-void WBus::Broadcast(String Broadcast_String) {
-
-	/* ------------------------------ Broadcast ------------------------------
-	Version 0.1
-	Broadcasts information to the I2C network
-	*/
-
-	int I2C_BUS_Responce;
-
-	beginTransmission (0);  // broadcast to all
-	write(Broadcast_String.c_str());
-	I2C_BUS_Responce = endTransmission();
-
-	if (I2C_BUS_Responce == 0) { // REMOVE ME
-		Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
-	} // REMOVE ME
-
-
-	if (I2C_BUS_Responce != 0) {
-		I2C_BUS_Error(I2C_BUS_Responce);
+	if (Error_Number == 1) { // represents an Error not useing the address just to be safe
+		Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
 	}
 
+	else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
+		Serial.println("I2C Error 2: Received NACK on transmit of address");
+	}
 
-} // End marker for Broadcast
+	else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
+		Serial.println("I2C Error 3: Received NACK on transmit of data");
+	}
+
+	else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
+		Serial.println(String("I2C BUS error on address: ") + String(_Device_ID));
+	}
+
+	else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
+		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master");
+	}
+
+	else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
+		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent");
+	}
+
+	else { // Above 6 is reserved for later errors
+		Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
+	}
+
+	return;
+
+} // End Marker - I2C_Error_Print
 
 
+
+// --------------------------------------------- Queue ---------------------------------------------
 
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
@@ -433,8 +393,6 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 	}
 
 } // End Marker for Push
-
-
 
 String WBus::Queue_Pop() {
 
@@ -468,8 +426,6 @@ String WBus::Queue_Pop() {
 
 } // End Marker for POP
 
-
-
 String WBus::Queue_Peek() {
 
 			if (_Queue_String == ";") {
@@ -482,33 +438,23 @@ String WBus::Queue_Peek() {
 
 }// End Marker for Peek
 
-
-
 String WBus::Queue_Peek_Queue() {
 			return _Queue_String;
 }
-
-
 
 int WBus::Queue_Length() {
 			return _Queue_Length;
 }
 
-
-
 int WBus::Queue_Is_Empthy() {
 			return _Queue_Is_Empthy;
 }
-
-
 
 void WBus::Queue_Clear() {
 			_Queue_String = ";";
 			_Queue_Length = 0;
 			_Queue_Is_Empthy = true;
 }
-
-
 
 String WBus::Queue_Search_Peek(String Search_String) {
 
@@ -528,8 +474,6 @@ String WBus::Queue_Search_Peek(String Search_String) {
 
 			return ";";
 }
-
-
 
 String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 			if (_Queue_String.indexOf(Search_String) >= 0) {
@@ -574,37 +518,51 @@ String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
 
 
-void WBus::Error_Blink(int Number_Of_Blinks) {
+// --------------------------------------------- MISC ---------------------------------------------
 
-			/* ------------------------------ Blink ------------------------------
-			Version 0.1
-			Blinks :-P
-			*/
+void WBus::Boot_Message() { // Displays a boot message if included
 
-			pinMode(LED_BUILTIN, OUTPUT);
+	if (_Log_To_Serial == true) {
 
-			int Blink_Timer = 500;
-			int Blink_Timer_Marker = 75;
+		if (_Serial_Speed != 0) {
+			Serial.begin(_Serial_Speed);
+		}
 
-			for (int x = 1; x < Number_Of_Blinks + 1; x++) {
+		Serial.println("");
+		Serial.println("Including wBus v0.1");
 
-				digitalWrite(LED_BUILTIN, HIGH);
-				delay(Blink_Timer);
-				digitalWrite(LED_BUILTIN, LOW);
-				delay(Blink_Timer);
-			}
+	}
 
-			delay(Blink_Timer);
+} // End marker for Boot_Message
 
-			for (int x = 1; x < 4; x++) {
+void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard LED to indicate errors
+  /* --------------------------------------------- Blink ---------------------------------------------
+  Version 0.1
+  Blinks :-P
+  */
 
-				digitalWrite(LED_BUILTIN, HIGH);
-				delay(Blink_Timer_Marker);
-				digitalWrite(LED_BUILTIN, LOW);
-				if (x < 3) { // Done to make the Serial activity blink apear as the 3rd end or error blink
-					delay(Blink_Timer_Marker);
-				}
-			}
+  pinMode(LED_BUILTIN, OUTPUT);
 
+  int Blink_Timer = 500;
+  int Blink_Timer_Marker = 75;
 
-}
+  for (int x = 1; x < Number_Of_Blinks + 1; x++) {
+
+  	digitalWrite(LED_BUILTIN, HIGH);
+  	delay(Blink_Timer);
+  	digitalWrite(LED_BUILTIN, LOW);
+  	delay(Blink_Timer);
+  }
+
+  delay(Blink_Timer);
+
+  for (int x = 1; x < 4; x++) {
+
+  	digitalWrite(LED_BUILTIN, HIGH);
+  	delay(Blink_Timer_Marker);
+  	digitalWrite(LED_BUILTIN, LOW);
+  	if (x < 3) { // Done to make the Serial activity blink apear as the 3rd end or error blink
+  		delay(Blink_Timer_Marker);
+  	}
+  }
+} // End Marfor - Error_Blink

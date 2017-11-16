@@ -12,7 +12,7 @@ int I2C_Address = 11;
 
 int I2C_BUS_Responce;
 
-WBus wBus(I2C_Address, 20, true, 115200);
+WBus wBus(I2C_Address, true, 20, true, 115200);
 
 
 void Broadcast(String Broadcast_String) {
@@ -56,11 +56,10 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Boot Start");
 
-	// wBus.Device_ID_Check();
+	wBus.Boot_Message();
 
 
 	wBus.begin(I2C_Address);
-	wBus.pullup(true);
 	TWAR = (I2C_Address << 1) | 1;
 	wBus.onReceive(I2C_Receive);
 

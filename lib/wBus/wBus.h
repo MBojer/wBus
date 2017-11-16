@@ -7,27 +7,32 @@ Network for made to run on the I2C bus using broadcast
 #ifndef WBus_h
   #define WBus_h
 
-  // From MWWire (WSWire)
-
+  #include "Arduino.h"
   #include <inttypes.h>
   #include "Stream.h"
   #define BUFFER_LENGTH 32
 
-  // End Marker MBWire (WSWire)
 
 
-  #include "Arduino.h"
 
   class WBus : public Stream {
 
     public:
-      // --------------------------------------------- From MBWire ---------------------------------------------
+
+
+      // --------------------------------------------- Setup ---------------------------------------------
+
+      WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
+
+
+      // --------------------------------------------- Wire Functions ---------------------------------------------
 
       void begin();
       void begin(uint8_t);
       void begin(int);
       void beginTransmission(uint8_t);
       void beginTransmission(int);
+      void broadcast(String Broadcast_String);
       uint8_t endTransmission(void);
       uint8_t requestFrom(uint8_t, uint8_t);
       uint8_t requestFrom(int, int);
@@ -41,17 +46,16 @@ Network for made to run on the I2C bus using broadcast
       void onRequest( void (*)(void) );
       void pullup(bool Activate);
 
-       using Print::write; // Change ME / REMOVE ME
+      using Print::write; // Change ME / REMOVE ME
+
 
       // --------------------------------------------- WBus ---------------------------------------------
 
-      WBus(int I2C_Device_ID, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
-      void Boot_Message();
       int Device_ID_Check();
       void I2C_BUS_Error(int Error_Number);
-      void Broadcast(String Broadcast_String);
 
-      // --------------------------------------------- I2C Command Queue ---------------------------------------------
+
+      // --------------------------------------------- Queue ---------------------------------------------
 
       void Queue_Push(String Push_String, bool Add_To_Front_Of_Queue);
       String Queue_Pop();
@@ -66,20 +70,21 @@ Network for made to run on the I2C bus using broadcast
 
       // --------------------------------------------- Misc ---------------------------------------------
 
-      void Error_Blink(int Number_Of_Blinks);
+      void Boot_Message();
+      void Blink_LED(int Number_Of_Blinks, int LED_Pin = 13);
 
 
 
 
     private:
-      // --------------------------------------------- From MBWire ---------------------------------------------
+      // --------------------------------------------- Two Wire Interface ---------------------------------------------
 
-      static uint8_t rxBuffer[];
+      static uint8_t rxBuffer[BUFFER_LENGTH];
       static uint8_t rxBufferIndex;
       static uint8_t rxBufferLength;
 
       static uint8_t txAddress;
-      static uint8_t txBuffer[];
+      static uint8_t txBuffer[BUFFER_LENGTH];
       static uint8_t txBufferIndex;
       static uint8_t txBufferLength;
 
@@ -89,21 +94,21 @@ Network for made to run on the I2C bus using broadcast
       static void onRequestService(void);
       static void onReceiveService(uint8_t*, int);
 
-      // --------------------------------------------- General ---------------------------------------------
-
+      // --------------------------------------------- I2C Bus ---------------------------------------------
       int _Device_ID;
+      bool _I2C_Internal_Pullup;
 
+
+      // --------------------------------------------- Serial ---------------------------------------------
       int _Log_To_Serial;
       long _Serial_Speed;
 
 
       // --------------------------------------------- Device ID Checkd ---------------------------------------------
-
       int _Device_ID_Check_OK = 0;
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------
-
       int _Max_Queue_Length;
       int _Queue_Length = 0;
       bool _Queue_Is_Empthy = true;

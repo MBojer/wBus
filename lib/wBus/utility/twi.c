@@ -57,7 +57,7 @@ static volatile uint8_t twi_rxBufferIndex;
 
 static volatile uint8_t twi_error;
 
-/* 
+/*
  * Function twi_init
  * Desc     readys twi pins and sets twi bitrate
  * Input    none
@@ -67,10 +67,6 @@ void twi_init(void)
 {
   // initialize state
   twi_state = TWI_READY;
-  
-  // DEactivate internal pullups for twi.
-  digitalWrite(SDA, 0);
-  digitalWrite(SCL, 0);
 
   // initialize twi prescaler and bit rate
   cbi(TWSR, TWPS0);
@@ -86,7 +82,7 @@ void twi_init(void)
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA);
 }
 
-/* 
+/*
  * Function twi_slaveInit
  * Desc     sets slave address and enables interrupt
  * Input    none
@@ -98,7 +94,7 @@ void twi_setAddress(uint8_t address)
   TWAR = address << 1;
 }
 
-/* 
+/*
  * Function twi_readFrom
  * Desc     attempts to become twi bus master and read a
  *          series of bytes from a device on the bus
@@ -119,7 +115,7 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
   // wait until twi is ready, become master receiver
   twi_tout(1);//Ini TimeOut
   while(TWI_READY != twi_state){
-    if (twi_tout(0)) break;  
+    if (twi_tout(0)) break;
     continue;
   }
   twi_state = TWI_MRX;
@@ -130,7 +126,7 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
   twi_masterBufferIndex = 0;
   twi_masterBufferLength = length-1;  // This is not intuitive, read on...
   // On receive, the previously configured ACK/NACK setting is transmitted in
-  // response to the received byte before the interrupt is signalled. 
+  // response to the received byte before the interrupt is signalled.
   // Therefor we must actually set NACK when the _next_ to last byte is
   // received, causing that NACK to be sent in response to receiving the last
   // expected byte of data.
@@ -145,7 +141,7 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
   // wait for read operation to complete
   twi_tout(1);
   while(TWI_MRX == twi_state){
-    if (twi_tout(0)) break;  
+    if (twi_tout(0)) break;
     continue;
   }
 
@@ -156,11 +152,11 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
   for(i = 0; i < length; ++i){
     data[i] = twi_masterBuffer[i];
   }
-	
+
   return length;
 }
 
-/* 
+/*
  * Function twi_writeTo
  * Desc     attempts to become twi bus master and write a
  *          series of bytes to a device on the bus
@@ -198,26 +194,26 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
   // initialize buffer iteration vars
   twi_masterBufferIndex = 0;
   twi_masterBufferLength = length;
-  
+
   // copy data to twi buffer
   for(i = 0; i < length; ++i){
     twi_masterBuffer[i] = data[i];
   }
-  
+
   // build sla+w, slave device address + w bit
   twi_slarw = TW_WRITE;
   twi_slarw |= address << 1;
-  
+
   // send start condition
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTA);
 
   // wait for write operation to complete
-  twi_tout(1);  
+  twi_tout(1);
   while(wait && (TWI_MTX == twi_state)){
-    if (twi_tout(0)) return 6;  
+    if (twi_tout(0)) return 6;
     continue;
   }
-  
+
   if (twi_error == 0xFF)
     return 0;	// success
   else if (twi_error == TW_MT_SLA_NACK)
@@ -228,7 +224,7 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
     return 4;	// other twi error
 }
 
-/* 
+/*
  * Function twi_transmit
  * Desc     fills slave tx buffer with data
  *          must be called in slave tx event callback
@@ -246,22 +242,22 @@ uint8_t twi_transmit(const uint8_t* data, uint8_t length)
   if(TWI_BUFFER_LENGTH < length){
     return 1;
   }
-  
+
   // ensure we are currently a slave transmitter
   if(TWI_STX != twi_state){
     return 2;
   }
-  
+
   // set length and copy data into tx buffer
   twi_txBufferLength = length;
   for(i = 0; i < length; ++i){
     twi_txBuffer[i] = data[i];
   }
-  
+
   return 0;
 }
 
-/* 
+/*
  * Function twi_attachSlaveRxEvent
  * Desc     sets function called before a slave read operation
  * Input    function: callback function to use
@@ -272,7 +268,7 @@ void twi_attachSlaveRxEvent( void (*function)(uint8_t*, int) )
   twi_onSlaveReceive = function;
 }
 
-/* 
+/*
  * Function twi_attachSlaveTxEvent
  * Desc     sets function called before a slave write operation
  * Input    function: callback function to use
@@ -283,7 +279,7 @@ void twi_attachSlaveTxEvent( void (*function)(void) )
   twi_onSlaveTransmit = function;
 }
 
-/* 
+/*
  * Function twi_reply
  * Desc     sends byte or readys receive line
  * Input    ack: byte indicating to ack or to nack
@@ -299,7 +295,7 @@ void twi_reply(uint8_t ack)
   }
 }
 
-/* 
+/*
  * Function twi_stop
  * Desc     relinquishes bus master status
  * Input    none
@@ -312,9 +308,9 @@ void twi_stop(void)
 
   // wait for stop condition to be exectued on bus
   // TWINT is not set after a stop condition!
-  twi_tout(1);  
+  twi_tout(1);
   while(TWCR & _BV(TWSTO)){
-    if (twi_tout(0)) return;  
+    if (twi_tout(0)) return;
     continue;
   }
 
@@ -322,7 +318,7 @@ void twi_stop(void)
   twi_state = TWI_READY;
 }
 
-/* 
+/*
  * Function twi_releaseBus
  * Desc     releases bus control
  * Input    none
@@ -341,13 +337,13 @@ void twi_releaseBus(void)
 static volatile uint32_t twi_toutc;
 uint8_t twi_tout(uint8_t ini)
 {
-	if (ini) twi_toutc=0; else twi_toutc++;	
+	if (ini) twi_toutc=0; else twi_toutc++;
 	if (twi_toutc>=100000UL) {
 		twi_toutc=0;
 		twi_init();
 		return 1;
 	}
-    return 0;  
+    return 0;
 }
 
 SIGNAL(TWI_vect)
@@ -364,7 +360,7 @@ SIGNAL(TWI_vect)
     // Master Transmitter
     case TW_MT_SLA_ACK:  // slave receiver acked address
     case TW_MT_DATA_ACK: // slave receiver acked data
-      // if there is data to send, send it, otherwise stop 
+      // if there is data to send, send it, otherwise stop
       if(twi_masterBufferIndex < twi_masterBufferLength){
         // copy data to output register and ack
         TWDR = twi_masterBuffer[twi_masterBufferIndex++];
@@ -448,7 +444,7 @@ SIGNAL(TWI_vect)
       // nack back at master
       twi_reply(0);
       break;
-    
+
     // Slave Transmitter
     case TW_ST_SLA_ACK:          // addressed, returned ack
     case TW_ST_ARB_LOST_SLA_ACK: // arbitration lost, returned ack
@@ -477,7 +473,7 @@ SIGNAL(TWI_vect)
         twi_reply(0);
       }
       break;
-    case TW_ST_DATA_NACK: // received nack, we are done 
+    case TW_ST_DATA_NACK: // received nack, we are done
     case TW_ST_LAST_DATA: // received ack, but we are done already!
       // ack future responses
       twi_reply(1);
@@ -494,4 +490,3 @@ SIGNAL(TWI_vect)
       break;
   }
 }
-
