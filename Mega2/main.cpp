@@ -8,11 +8,11 @@ unsigned int Counter;
 
 String I2C_Receive_Data;
 
-int I2C_Address = 11;
+int I2C_Address = 12;
 
 int I2C_BUS_Responce;
 
-WBus wBus(I2C_Address, true, 20, true, 115200);
+WBus wBus(I2C_Address, false, 20, true, 115200);
 
 
 void I2C_Receive(int HowMany) {
@@ -38,7 +38,7 @@ void setup() {
 
 
   Serial.println("Boot Done");
-	wBus.broadcast("Mega1 Boot Done");
+	wBus.broadcast("Mega2 Boot Done");
 	delay(1000);
 	}
 
@@ -52,7 +52,7 @@ void loop() {
   }
 
 	if (Counter % 7 == 0) {
-		wBus.broadcast("Mega1: " + String(Counter));
+		wBus.broadcast("Mega2: " + String(Counter));
 	}
 
 
