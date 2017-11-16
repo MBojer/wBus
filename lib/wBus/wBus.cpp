@@ -31,7 +31,7 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 	_Serial_Speed = Serial_Speed;
 
   pullup(_I2C_Internal_Pullup); // Sets the PullUp Resistors
-  Device_ID_Check();
+  
 
 
 
@@ -287,7 +287,9 @@ int WBus::Device_ID_Check() {
 
 	// broadcast(_Device_ID + "DD");
 
-  begin(_Device_ID);
+
+
+  broadcast("Mega1 Test");
 
   Serial.println("test");
 
