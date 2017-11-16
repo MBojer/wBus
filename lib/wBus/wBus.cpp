@@ -36,7 +36,6 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 
   begin(_Device_ID);
 
-  Device_ID_Check();
 
 } // End Marker for WBus
 
