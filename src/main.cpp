@@ -9,7 +9,7 @@ unsigned int Counter;
 
 String I2C_Receive_Data;
 
-int I2C_Address = 16;
+int I2C_Address = 11;
 
 int I2C_BUS_Responce;
 
@@ -57,17 +57,19 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Boot Start");
 
-
+	// wBus.Device_ID_Check();
 
 
 	Wire.begin(I2C_Address);
+	Wire.pullup(true);
 	TWAR = (I2C_Address << 1) | 1;
 	Wire.onReceive(I2C_Receive);
-	Wire.pullup(true);
 
 
   Serial.println("Boot Done");
 	Broadcast("Mega1 Boot Done");
+	delay(1000);
+	Broadcast("DD");
 }
 
 void loop() {

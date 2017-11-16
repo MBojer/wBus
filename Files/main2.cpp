@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include <MBWire.h>
+#include <wBus.h>
 
 int Loop_Delay = 500;
 
@@ -11,6 +12,8 @@ String I2C_Receive_Data;
 int I2C_Address = 12;
 
 int I2C_BUS_Responce;
+
+
 
 
 void Broadcast(String Broadcast_String) {
@@ -25,7 +28,7 @@ void Broadcast(String Broadcast_String) {
 
 	int I2C_BUS_Responce;
 
-	Wire.beginTransmission (0);  // broadcast to all
+	Wire.beginTransmission(0);  // broadcast to all
 	Wire.write(Broadcast_String.c_str());
 	I2C_BUS_Responce = Wire.endTransmission();
 
@@ -51,15 +54,18 @@ void I2C_Receive(int HowMany) {
 
 
 void setup() {
+	Serial.begin(115200);
+	Serial.println("Boot Start");
 
-	// Wire.pullup(true);
+	// wBus.Device_ID_Check();
 
-  Wire.begin(I2C_Address);
-  TWAR = (I2C_Address << 1) | 1;
-  Wire.onReceive(I2C_Receive);
+	Wire.pullup(true);
 
-  Serial.begin(115200);
-  Serial.println("Boot Start");
+	Wire.begin(I2C_Address);
+	TWAR = (I2C_Address << 1) | 1;
+	Wire.onReceive(I2C_Receive);
+
+
   Serial.println("Boot Done");
 	Broadcast("Mega2 Boot Done");
 }

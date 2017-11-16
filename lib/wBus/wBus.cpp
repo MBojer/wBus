@@ -74,39 +74,54 @@ void wBus::I2C_BUS_Error(int Error_Number) {
 
 int wBus::Device_ID_Check() {
 
-	if (_Device_ID_Check_OK == 0) { // Check not done
+	String test_string = "1337"; // CHANGE ME
+	String I2C_BUS_Responce;
 
-		if (_Device_ID < 10 || _Device_ID > 99) {
-			Serial.println("ERROR: Devide ID not between 10 and 99");
-			_Device_ID_Check_OK = 2; // 2 = Error
-			return 2; // 2 = Error
-		}
+	Wire.begin(100);
 
-		Wire.begin();
+	Wire.beginTransmission(100);  // broadcast to all
+	Wire.write(test_string.c_str());
+	I2C_BUS_Responce = Wire.endTransmission();
 
-		int I2C_BUS_Responce;
-
-		Wire.beginTransmission(_Device_ID);
-		I2C_BUS_Responce = Wire.endTransmission();
-
-		Serial.println(I2C_BUS_Responce); // REMOVE ME
-
-		if (I2C_BUS_Responce != 0) {
-			Serial.println("ERROR: Devide ID in use");
-			_Device_ID_Check_OK = 2; // 2 = Error
-			Serial.println("Marker");
-			return 2; // 2 = Error
-		}
-
-		_Device_ID_Check_OK = 1; // 1 = Check done and passed
-		return 1; // 1 = Check done and passed
+	if (I2C_BUS_Responce != "") { // CHANGE ME
+		Serial.println(I2C_BUS_Responce);
 	}
 
-	else if (_Device_ID_Check_OK == 1) { // Check done and passed
-		return 1; // 1 = Check done and passed
-	}
-
-	return 2; // 2 = Error
+	return 1;
+  //
+	// if (_Device_ID_Check_OK == 0) { // Check not done
+  //
+	// 	if (_Device_ID < 10 || _Device_ID > 99) {
+	// 		Serial.println("ERROR: Devide ID not between 10 and 99");
+	// 		_Device_ID_Check_OK = 2; // 2 = Error
+	// 		return 2; // 2 = Error
+	// 	}
+  //
+	// 	Wire.begin();
+  //
+	// 	int I2C_BUS_Responce;
+  //
+	// 	Wire.beginTransmission(_Device_ID);
+	// 	I2C_BUS_Responce = Wire.endTransmission();
+  //
+	// 	Serial.println(I2C_BUS_Responce); // REMOVE ME
+  //
+	// 	if (I2C_BUS_Responce != 0) {
+	// 		Serial.println("ERROR: Devide ID in use");
+	// 		_Device_ID_Check_OK = 2; // 2 = Error
+	// 		Serial.println("Marker");
+	// 		return 2; // 2 = Error
+	// 	}
+  //
+	// 	_Device_ID_Check_OK = 1; // 1 = Check done and passed
+	// 	return 1; // 1 = Check done and passed
+	// }
+  //
+	// else if (_Device_ID_Check_OK == 1) { // Check done and passed
+	// 	return 1; // 1 = Check done and passed
+	// }
+  //
+	// return 2; // 2 = Error
 
 } // END MARKER - Device_ID
 
