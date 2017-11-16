@@ -30,6 +30,8 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
 
+  _Device_ID_Check_OK_Counter = round(Loop_Delay / 75);
+
   _Script_Loop_Delay = Loop_Delay;
 
   pullup(_I2C_Internal_Pullup); // Sets the PullUp Resistors
@@ -292,6 +294,7 @@ int WBus::Device_ID_Check() {
   */
 
   Serial.println("Device_ID_Check"); // REMOVE ME
+  Serial.println(_Device_ID_Check_OK); // REMOVE ME
 
   if (_Device_ID_Check_OK == 0) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     broadcast(String(_Device_ID) + "DD");
@@ -332,9 +335,9 @@ int WBus::Device_ID_Check() {
   }
 
   if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
-    _Device_ID_Check_OK_Counter++;
+    _Device_ID_Check_OK_Counter--;
 
-    Serial.println("_Device_ID_Check_OK_Counter:" + String(_Device_ID_Check_OK_Counter++));
+    Serial.println("_Device_ID_Check_OK_Counter:" + String(_Device_ID_Check_OK_Counter)); // REMOVE ME
 
     if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
       _I2C_Bus_Error = true;
@@ -342,8 +345,7 @@ int WBus::Device_ID_Check() {
       return 2;
     }
 
-    Serial.println((_Script_Loop_Delay % 10000)); // REMOVE ME
-    if (_Device_ID_Check_OK_Counter < _Script_Loop_Delay % 10000) { // Done no reply on "DD" assuming device id unique
+    if (_Device_ID_Check_OK_Counter == 0) { // Done no reply on "DD" assuming device id unique
       Serial.println("MARKER 56789"); // CHANGE ME
       _Device_ID_Check_OK = 1;
       return 1;
