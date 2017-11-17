@@ -305,7 +305,7 @@ int WBus::Device_ID_Check() {
     return 3;
   }
 
-  if (_Device_ID_Check_OK == 1) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 1) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
 
     if (_Queue_Device_ID_Check_Hit == true) {
       /*
@@ -322,8 +322,8 @@ int WBus::Device_ID_Check() {
       } // Hit ducplicate device id found
 
       else {
-        Queue_Search_Pop(String(String(_Device_ID) + "DD"), true);
-        Queue_Search_Pop(String(String(_Device_ID) + "DX"), true);
+        Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
+        Queue_Search_Pop("DX", true); // Clears the queue for device id check requests
         _Queue_Device_ID_Check_Hit = false;
         return 1;
       } // Clear queue for Device ID requests
@@ -332,27 +332,31 @@ int WBus::Device_ID_Check() {
     return 1;
   }
 
-  if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
       return 2;
   }
 
-  if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     _Device_ID_Check_OK_Counter--;
 
     if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
+      Queue_Clear();
       _Device_ID_Check_OK = 2;
       _I2C_Bus_Error = 1;
       return 2;
     }
 
     if (_Device_ID_Check_OK_Counter == 0) { // Done no reply on "DD" assuming device id unique
-      Serial.println("MARKER 56789"); // CHANGE ME
+      Serial.println("Device ID: " + String(_Device_ID));
+      Serial.println("Device ID Check Compleate, ID not in use");
       _Device_ID_Check_OK = 1;
       return 1;
     }
 
+    else { // No reply broadcasting device ID again
     broadcast(String(_Device_ID) + "DD");
     return 3;
+    }
 
   }
 
@@ -363,7 +367,7 @@ int WBus::Device_ID_Check() {
 
   Serial.println("Device_ID_Check - End");
 
-  return 1;
+  return 3;
 
 
 
@@ -410,7 +414,6 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
   if (_I2C_Bus_Error != 0) { // Error on I2C bus disabling Queue_Push
-    Serial.println("MARKER 1234");
     return;
   }
 
