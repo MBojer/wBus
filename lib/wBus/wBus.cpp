@@ -295,10 +295,6 @@ int WBus::Device_ID_Check() {
 
   Serial.println("Device_ID_Check"); // REMOVE ME
   Serial.println(_Device_ID_Check_OK); // REMOVE ME
-  Serial.println(Queue_Search_Peek("DD")); // REMOVE ME
-  Serial.println(Queue_Search_Peek("DX")); // REMOVE ME
-  Serial.println(Queue_Peek_Queue()); // REMOVE ME
-  Serial.println(_Queue_Device_ID_Check_Hit); // REMOVE ME
 
   if (_Device_ID_Check_OK == 0) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     broadcast(String(_Device_ID) + "DD");
@@ -338,8 +334,9 @@ int WBus::Device_ID_Check() {
       return 2;
   }
 
-  else if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 3 && _Queue_Device_ID_Check_Hit == true) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     _Device_ID_Check_OK_Counter--;
+    Serial.println("_Device_ID_Check_OK_Counter--");
 
     if (Queue_Search_Peek("DX") != ";") { // Device ID Check failed going to error state
       _Device_ID_Check_OK = 2;
