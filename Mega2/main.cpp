@@ -17,6 +17,11 @@ int I2C_BUS_Responce;
 
 WBus wBus(I2C_Address, true, 20, true, 115200, Loop_Delay);
 
+void Error_Mode_Local() {
+  if (wBus.Device_ID_Check() == 2) {
+    wBus.Blink_LED(5);
+  }
+}
 
 void I2C_Receive(int HowMany) {
 
@@ -24,7 +29,7 @@ void I2C_Receive(int HowMany) {
     I2C_Receive_Data += (char)wBus.read();
   }
 
-wBus.Queue_Push(I2C_Receive_Data, false);
+  wBus.Queue_Push(I2C_Receive_Data, false);
 
 } //End marker for I2C_Receive
 
@@ -37,7 +42,7 @@ void setup() {
   unsigned int Boot_Delay = random(0, 5000); // CHANGE ME
   Serial.println("Random start delay: " + String(Boot_Delay) + " milliseconds"); // CHANGE ME
   delay(Boot_Delay);
-  delay(5000);
+
 
   wBus.Boot_Message();
 
@@ -55,6 +60,9 @@ void loop() {
   // Serial.println("Counter: " + String(Counter));
 
   wBus.Device_ID_Check();
+  Error_Mode_Local();
+
+
 
   if (I2C_Receive_Data != "") {
     Serial.println("Reviced: " + I2C_Receive_Data);
@@ -62,7 +70,7 @@ void loop() {
   }
 
   if (Counter % 7 == 0) {
-    wBus.broadcast("Mega2: " + String(Counter));
+    wBus.broadcast("Mega1: " + String(Counter));
   }
 
 
