@@ -353,6 +353,7 @@ int WBus::Device_ID_Check() {
     }
 
     else { // No reply broadcasting device ID again
+      delay(100);
       broadcast(String(_Device_ID) + "DD");
       return 3;
     }
