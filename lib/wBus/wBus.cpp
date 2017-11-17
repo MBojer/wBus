@@ -346,16 +346,15 @@ int WBus::Device_ID_Check() {
       return 2;
     }
 
-    if (_Device_ID_Check_OK_Counter == 0) { // Done no reply on "DD" assuming device id unique
-      Serial.println("Device ID: " + String(_Device_ID));
-      Serial.println("Device ID Check Compleate, ID not in use");
+    else if (_Device_ID_Check_OK_Counter == 0) { // Done no reply on "DD" assuming device id unique
+      Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
       _Device_ID_Check_OK = 1;
       return 1;
     }
 
     else { // No reply broadcasting device ID again
-    broadcast(String(_Device_ID) + "DD");
-    return 3;
+      broadcast(String(_Device_ID) + "DD");
+      return 3;
     }
 
   }
@@ -413,7 +412,7 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
-  if (_I2C_Bus_Error != 0) { // Error on I2C bus disabling Queue_Push
+  if (_I2C_Bus_Error == 0) { // Error on I2C bus disabling Queue_Push
     return;
   }
 
