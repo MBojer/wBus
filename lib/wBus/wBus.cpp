@@ -323,8 +323,9 @@ int WBus::Device_ID_Check() {
       } // Hit ducplicate device id found
 
       else {
+        Serial.println("Clear queue"); // REMOVE ME
         Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
-        Queue_Search_Pop("DX", true); // Clears the queue for device id check requests
+        Queue_Search_Pop("DX", true); // Clears the queue for device id check replys
         _Queue_Device_ID_Check_Hit = false;
         return 1;
       } // Clear queue for Device ID requests
