@@ -57,14 +57,13 @@ static volatile uint8_t twi_rxBufferIndex;
 
 static volatile uint8_t twi_error;
 
-/*
- * Function twi_init
- * Desc     readys twi pins and sets twi bitrate
- * Input    none
- * Output   none
- */
-void twi_init(void)
-{
+void twi_init(void) {
+  /*
+  * Function twi_init
+  * Desc     readys twi pins and sets twi bitrate
+  * Input    none
+  * Output   none
+  */
   // initialize state
   twi_state = TWI_READY;
 
@@ -82,29 +81,27 @@ void twi_init(void)
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA);
 }
 
-/*
- * Function twi_slaveInit
- * Desc     sets slave address and enables interrupt
- * Input    none
- * Output   none
- */
-void twi_setAddress(uint8_t address)
-{
+void twi_setAddress(uint8_t address) {
+  /*
+  * Function twi_slaveInit
+  * Desc     sets slave address and enables interrupt
+  * Input    none
+  * Output   none
+  */
   // set twi slave address (skip over TWGCE bit)
   TWAR = address << 1;
 }
 
-/*
- * Function twi_readFrom
- * Desc     attempts to become twi bus master and read a
- *          series of bytes from a device on the bus
- * Input    address: 7bit i2c device address
- *          data: pointer to byte array
- *          length: number of bytes to read into array
- * Output   number of bytes read
- */
-uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
-{
+uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length) {
+  /*
+  * Function twi_readFrom
+  * Desc     attempts to become twi bus master and read a
+  *          series of bytes from a device on the bus
+  * Input    address: 7bit i2c device address
+  *          data: pointer to byte array
+  *          length: number of bytes to read into array
+  * Output   number of bytes read
+  */
   uint8_t i;
 
   // ensure data will fit into buffer
@@ -156,24 +153,23 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length)
   return length;
 }
 
-/*
- * Function twi_writeTo
- * Desc     attempts to become twi bus master and write a
- *          series of bytes to a device on the bus
- * Input    address: 7bit i2c device address
- *          data: pointer to byte array
- *          length: number of bytes in array
- *          wait: boolean indicating to wait for write or not
- * Output   0 .. success
- *          1 .. length to long for buffer
- *          2 .. address send, NACK received
- *          3 .. data send, NACK received
- *          4 .. other twi error (lost bus arbitration, bus error, ..)
- *          5 .. timed out while trying to become Bus Master
- *          6 .. timed out while waiting for data to be sent
- */
-uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait)
-{
+uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait) {
+  /*
+  * Function twi_writeTo
+  * Desc     attempts to become twi bus master and write a
+  *          series of bytes to a device on the bus
+  * Input    address: 7bit i2c device address
+  *          data: pointer to byte array
+  *          length: number of bytes in array
+  *          wait: boolean indicating to wait for write or not
+  * Output   0 .. success
+  *          1 .. length to long for buffer
+  *          2 .. address send, NACK received
+  *          3 .. data send, NACK received
+  *          4 .. other twi error (lost bus arbitration, bus error, ..)
+  *          5 .. timed out while trying to become Bus Master
+  *          6 .. timed out while waiting for data to be sent
+  */
   uint8_t i;
 
   // ensure data will fit into buffer
@@ -224,18 +220,17 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
     return 4;	// other twi error
 }
 
-/*
- * Function twi_transmit
- * Desc     fills slave tx buffer with data
- *          must be called in slave tx event callback
- * Input    data: pointer to byte array
- *          length: number of bytes in array
- * Output   1 length too long for buffer
- *          2 not slave transmitter
- *          0 ok
- */
-uint8_t twi_transmit(const uint8_t* data, uint8_t length)
-{
+uint8_t twi_transmit(const uint8_t* data, uint8_t length) {
+  /*
+  * Function twi_transmit
+  * Desc     fills slave tx buffer with data
+  *          must be called in slave tx event callback
+  * Input    data: pointer to byte array
+  *          length: number of bytes in array
+  * Output   1 length too long for buffer
+  *          2 not slave transmitter
+  *          0 ok
+  */
   uint8_t i;
 
   // ensure data will fit into buffer
@@ -257,36 +252,33 @@ uint8_t twi_transmit(const uint8_t* data, uint8_t length)
   return 0;
 }
 
-/*
- * Function twi_attachSlaveRxEvent
- * Desc     sets function called before a slave read operation
- * Input    function: callback function to use
- * Output   none
- */
-void twi_attachSlaveRxEvent( void (*function)(uint8_t*, int) )
-{
+void twi_attachSlaveRxEvent( void (*function)(uint8_t*, int) ) {
+  /*
+  * Function twi_attachSlaveRxEvent
+  * Desc     sets function called before a slave read operation
+  * Input    function: callback function to use
+  * Output   none
+  */
   twi_onSlaveReceive = function;
 }
 
-/*
- * Function twi_attachSlaveTxEvent
- * Desc     sets function called before a slave write operation
- * Input    function: callback function to use
- * Output   none
- */
-void twi_attachSlaveTxEvent( void (*function)(void) )
-{
+void twi_attachSlaveTxEvent( void (*function)(void) ) {
+  /*
+  * Function twi_attachSlaveTxEvent
+  * Desc     sets function called before a slave write operation
+  * Input    function: callback function to use
+  * Output   none
+  */
   twi_onSlaveTransmit = function;
 }
 
-/*
- * Function twi_reply
- * Desc     sends byte or readys receive line
- * Input    ack: byte indicating to ack or to nack
- * Output   none
- */
-void twi_reply(uint8_t ack)
-{
+void twi_reply(uint8_t ack) {
+  /*
+  * Function twi_reply
+  * Desc     sends byte or readys receive line
+  * Input    ack: byte indicating to ack or to nack
+  * Output   none
+  */
   // transmit master read ready signal, with or without ack
   if(ack){
     TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWINT) | _BV(TWEA);
@@ -295,14 +287,13 @@ void twi_reply(uint8_t ack)
   }
 }
 
-/*
- * Function twi_stop
- * Desc     relinquishes bus master status
- * Input    none
- * Output   none
- */
-void twi_stop(void)
-{
+void twi_stop(void) {
+  /*
+  * Function twi_stop
+  * Desc     relinquishes bus master status
+  * Input    none
+  * Output   none
+  */
   // send stop condition
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTO);
 
@@ -318,14 +309,13 @@ void twi_stop(void)
   twi_state = TWI_READY;
 }
 
-/*
- * Function twi_releaseBus
- * Desc     releases bus control
- * Input    none
- * Output   none
- */
-void twi_releaseBus(void)
-{
+void twi_releaseBus(void) {
+  /*
+  * Function twi_releaseBus
+  * Desc     releases bus control
+  * Input    none
+  * Output   none
+  */
   // release bus
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA) | _BV(TWINT);
 
@@ -487,4 +477,30 @@ SIGNAL(TWI_vect) {
       twi_stop();
       break;
   }
+}
+
+
+unsigned char twi_kill( void ) {
+  /*---------------------------------------------------------------
+  Function for generating a TWI Stop Condition. Used to release
+  the TWI bus.
+  ---------------------------------------------------------------*/
+  #define PIN_USI             PINE
+  #define PORT_USI            PORTE
+  #define PORT_USI_SDA        PORTE5
+  #define PORT_USI_SCL        PORTE4
+  #define PIN_USI_SDA         PINE5
+  #define PIN_USI_SCL         PINE4
+  #define T2_TWI    5 		// >4,7us
+  #define T4_TWI    4 		// >4,0us
+
+  PORT_USI &= ~(1<<PIN_USI_SDA);           // Pull SDA low.
+  PORT_USI |= (1<<PIN_USI_SCL);            // Release SCL.
+  while( !(PIN_USI & (1<<PIN_USI_SCL)) );  // Wait for SCL to go high.
+	_delay_us(T4_TWI);
+  PORT_USI |= (1<<PIN_USI_SDA);            // Release SDA.
+	_delay_us(T2_TWI);
+
+  return 1;
+
 }

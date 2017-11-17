@@ -98,7 +98,7 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- I2C Bus ---------------------------------------------
       int _Device_ID;
       bool _I2C_Internal_Pullup;
-      bool _I2C_Bus_Error = false; // 0 = OK  -  1 = Error
+      int _I2C_Bus_Error = 0; // 0 = OK  -  1 = Error - Failed Device ID check
 
 
       // --------------------------------------------- Serial ---------------------------------------------

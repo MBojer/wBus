@@ -341,9 +341,8 @@ int WBus::Device_ID_Check() {
   }
 
   if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
-    if (_I2C_Bus_Error == false) {
+    if (_I2C_Bus_Error != 0) {
       stop();
-      _I2C_Bus_Error = true;
       return 2;
     }
 
@@ -355,6 +354,7 @@ int WBus::Device_ID_Check() {
 
     if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
       _Device_ID_Check_OK = 2;
+      _I2C_Bus_Error = 1;
       return 2;
     }
 
