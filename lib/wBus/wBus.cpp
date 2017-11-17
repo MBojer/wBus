@@ -340,11 +340,11 @@ int WBus::Device_ID_Check() {
   else if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     _Device_ID_Check_OK_Counter--;
 
-    if (Queue_Search_Peek(String(String(_Device_ID) + "DX")) != ";") { // Device ID Check failed going to error state
+    if (Queue_Search_Peek("DX") != ";") { // Device ID Check failed going to error state
       _Device_ID_Check_OK = 2;
       _I2C_Bus_Error = 1;
       // Queue_Clear();
-      Serial.println("ERROR_ Duplicate Device ID found, going into Error_Mode");
+      Serial.println("ERROR: Duplicate Device ID found, going into Error_Mode");
       return 2;
     }
 
