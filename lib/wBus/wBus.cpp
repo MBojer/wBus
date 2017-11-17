@@ -353,10 +353,7 @@ int WBus::Device_ID_Check() {
   if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     _Device_ID_Check_OK_Counter--;
 
-    Serial.println("_Device_ID_Check_OK_Counter:" + String(_Device_ID_Check_OK_Counter)); // REMOVE ME
-
     if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
-      _I2C_Bus_Error = true;
       _Device_ID_Check_OK = 2;
       return 2;
     }
