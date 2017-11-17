@@ -413,20 +413,26 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
   if (_I2C_Bus_Error == 0) { // Error on I2C bus disabling Queue_Push
+    Serial.println("_I2C_Bus_Error == 0"); // REMOVE ME
     return;
   }
 
+  Serial.println("MARKER 987"); // REMOVE ME
+
   if (Push_String.indexOf("DD") <= 0) {
+    Serial.println("Push_String.indexOf(DD) <= 0)"); // REMOVE ME
     _Queue_Device_ID_Check_Hit = true;
   }
 
 	if (_Queue_Is_Empthy == true) {
+    Serial.println("_Queue_Is_Empthy == true"); // REMOVE ME
 		_Queue_String = Push_String + ";";
 		_Queue_Length = 1;
 		_Queue_Is_Empthy = false;
 	}
 
 	else {
+    Serial.println("_Queue_Is_Empthy else "); // REMOVE ME
 		_Queue_String = _Queue_String + Push_String + ";";
 		_Queue_Length++;
 		_Queue_Is_Empthy = false;
