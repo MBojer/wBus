@@ -118,9 +118,9 @@ int WBus::broadcast(String Broadcast_String) {
       return I2C_BUS_Responce;
     }
 
-    else {
+    else { // REMOVE ME
       Serial.println("Retransmitting: " + Broadcast_String); // REMOVE ME
-    }
+    } // REMOVE ME
 
     Serial.println("x: " + String(x));
     delay(250);
@@ -350,18 +350,19 @@ int WBus::Device_ID_Check() {
 
   else if (_Device_ID_Check_OK == 3) { // 3 = Waiting for reply
 
-    if (_Queue_Device_ID_Check_Hit == true) {
+    if (_Queue_Device_ID_Check_Hit == true) { // "DD" in queue "DD" Symbolizes and Device_ID check
       if (Queue_Search_Peek(String(_Device_ID) + "DD") != ";") { // Device ID Check failed going to error state
         _Device_ID_Check_OK = 2;
         _I2C_Bus_Error = 1;
-        // Queue_Clear();
+        Queue_Clear();
         Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+        // begin(110); // CHAMGE ME
+        // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
         return 2;
       }
     }
 
-
-    else if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
+    if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
       Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
       _Device_ID_Check_OK = 1;
       return 1;
@@ -382,15 +383,8 @@ int WBus::Device_ID_Check() {
 
       return 3;
     }
-
-  }
-
-  Serial.println("Device_ID_Check - End"); // REMOVE ME
-
-  return 4;
-
-
-
+  } // END MARKER - else if (_Device_ID_Check_OK == 3)
+return 3;
 } // END MARKER - Device_ID
 
 void WBus::I2C_BUS_Error(int Error_Number) {
@@ -438,19 +432,16 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
   }
 
   if (Push_String.indexOf("DD") <= 0) {
-    Serial.println("Push_String.indexOf(DD) <= 0)"); // REMOVE ME
     _Queue_Device_ID_Check_Hit = true;
   }
 
 	if (_Queue_Is_Empthy == true) {
-    Serial.println("_Queue_Is_Empthy == true"); // REMOVE ME
 		_Queue_String = Push_String + ";";
 		_Queue_Length = 1;
 		_Queue_Is_Empthy = false;
 	}
 
 	else {
-    Serial.println("_Queue_Is_Empthy not empthey"); // REMOVE ME
 		_Queue_String = _Queue_String + Push_String + ";";
 		_Queue_Length++;
 		_Queue_Is_Empthy = false;
