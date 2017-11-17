@@ -284,7 +284,7 @@ void WBus::stop() {
 
   Serial.println("wBus - Stop - Kill"); // REMOVE ME
   twi_kill();
-  Serial.println("wBus - Stop - Kill - After"); // REMOVE ME
+  begin(100);
 
 }
 
