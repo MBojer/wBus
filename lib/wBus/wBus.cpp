@@ -410,6 +410,7 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
   if (_I2C_Bus_Error != 0) { // Error on I2C bus disabling Queue_Push
+    Serial.println("MARKER 1234");
     return;
   }
 
