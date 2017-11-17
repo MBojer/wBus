@@ -297,6 +297,7 @@ int WBus::Device_ID_Check() {
   Serial.println(_Device_ID_Check_OK); // REMOVE ME
   Serial.println(Queue_Search_Peek("DD")); // REMOVE ME
   Serial.println(Queue_Peek_Queue()); // REMOVE ME
+  Serial.println(_Queue_Device_ID_Check_Hit); // REMOVE ME
 
   if (_Device_ID_Check_OK == 0) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
     broadcast(String(_Device_ID) + "DD");
@@ -408,7 +409,7 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
-  if (Push_String.indexOf(Push_String) <= 0) {
+  if (Push_String.indexOf("DD") <= 0) {
     _Queue_Device_ID_Check_Hit = true;
   }
 
@@ -517,13 +518,11 @@ String WBus::Queue_Search_Peek(String Search_String) {
 }
 
 String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
-			if (_Queue_String.indexOf(Search_String) >= 0) {
 
+			if (_Queue_String.indexOf(Search_String) >= 0) {
 				String Search_Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
 
-
 				if (Search_Pop_String.indexOf(";") <= 0) {
-
 					_Queue_String = _Queue_String.substring(Search_Pop_String.length() + 1);
 				}
 
