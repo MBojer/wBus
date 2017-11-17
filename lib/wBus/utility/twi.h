@@ -37,7 +37,7 @@
   #define TWI_MTX   2
   #define TWI_SRX   3
   #define TWI_STX   4
-  
+
   void twi_init(void);
   void twi_setAddress(uint8_t);
   uint8_t twi_readFrom(uint8_t, uint8_t*, uint8_t);
@@ -49,6 +49,6 @@
   void twi_stop(void);
   void twi_releaseBus(void);
   uint8_t twi_tout(uint8_t);
+  unsigned char twi_kill( void );
 
 #endif
-

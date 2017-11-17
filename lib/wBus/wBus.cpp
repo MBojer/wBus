@@ -282,10 +282,9 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
 
 void WBus::stop() {
 
-  Serial.println("wBus - Stop - Stop"); // REMOVE ME
-  twi_stop();
-  Serial.println("wBus - Stop - RelaseBus"); // REMOVE ME
-  twi_releaseBus();
+  Serial.println("wBus - Stop - Kill"); // REMOVE ME
+  twi_kill();
+  Serial.println("wBus - Stop - Kill - After"); // REMOVE ME
 
 }
 
