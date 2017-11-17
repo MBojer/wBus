@@ -280,14 +280,6 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
   }
 }
 
-void WBus::stop() {
-
-  Serial.println("wBus - Stop - Kill"); // REMOVE ME
-  twi_kill();
-  begin(100);
-
-}
-
 
 
 // --------------------------------------------- WBus ---------------------------------------------
@@ -340,11 +332,6 @@ int WBus::Device_ID_Check() {
   }
 
   if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
-    if (_I2C_Bus_Error != 0) {
-      stop();
-      return 2;
-    }
-
       return 2;
   }
 
@@ -375,96 +362,9 @@ int WBus::Device_ID_Check() {
 
   Serial.println("Device_ID_Check - End");
 
-  // return 1;
+  return 1;
 
 
-
-
-/*
-
-  // if (I2C_BUS_Responce == 0) {
-  //   Serial.println("WARNING: Device_ID_Check address in use");
-  //
-  //   for (int x = 1; x < 3; x++) {
-  //     delay(500);
-  //     beginTransmission(100);
-  //     write(1);
-  //     I2C_BUS_Responce = endTransmission();
-  //
-  //     if (I2C_BUS_Responce == 2) {
-  //       Serial.println("MARKER: Address ok");
-  //       break;
-  //     }
-  //
-  //     else if (I2C_BUS_Responce == 6) {
-  //       Serial.println("ERROR: I2C Bus wires not connected");
-  //       return 2;
-  //     }
-  //   }
-  // } // End Marker - if (I2C_BUS_Responce == 0)
-  //
-  // else if (I2C_BUS_Responce == 2) {
-  //   Serial.println("INFO: I2C Bus Address FREE"); // REMOVE ME
-  // }
-  //
-  // else if (I2C_BUS_Responce == 6) {
-  //   Serial.println("ERROR: I2C Bus wires not connected");
-  //   return 2;
-  // }
-
-
-  //
-  //
-	// begin(100);
-  //
-  //
-  //
-	// if (I2C_BUS_Responce == 0) { // CHANGE ME
-	// 	Serial.println("MARKER: Address In Use");
-	// }
-  //
-  // else {
-  //   Serial.println("MARKER: Address FREE");
-  //
-  // }
-
-
-  //
-	// if (_Device_ID_Check_OK == 0) { // Check not done
-  //
-	// 	if (_Device_ID < 10 || _Device_ID > 99) {
-	// 		Serial.println("ERROR: Devide ID not between 10 and 99");
-	// 		_Device_ID_Check_OK = 2; // 2 = Error
-	// 		return 2; // 2 = Error
-	// 	}
-  //
-	// 	Wire.begin();
-  //
-	// 	int I2C_BUS_Responce;
-  //
-	// 	Wire.beginTransmission(_Device_ID);
-	// 	I2C_BUS_Responce = Wire.endTransmission();
-  //
-	// 	Serial.println(I2C_BUS_Responce); // REMOVE ME
-  //
-	// 	if (I2C_BUS_Responce != 0) {
-	// 		Serial.println("ERROR: Devide ID in use");
-	// 		_Device_ID_Check_OK = 2; // 2 = Error
-	// 		Serial.println("Marker");
-	// 		return 2; // 2 = Error
-	// 	}
-  //
-	// 	_Device_ID_Check_OK = 1; // 1 = Check done and passed
-	// 	return 1; // 1 = Check done and passed
-	// }
-  //
-	// else if (_Device_ID_Check_OK == 1) { // Check done and passed
-	// 	return 1; // 1 = Check done and passed
-	// }
-  //
-	// return 2; // 2 = Error
-
-  */
 
 } // END MARKER - Device_ID
 
@@ -676,6 +576,12 @@ void WBus::Boot_Message() { // Displays a boot message if included
 	}
 } // End marker for Boot_Message
 
+
+void WBus::Blink_LED(int Number_Of_Blinks) { // Blinks the onboard LED to indicate errors
+  Blink_LED(Number_Of_Blinks, 13); // 13 is the onboard LED
+} // End Marfor - Error_Blink With Pin number
+
+
 void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard LED to indicate errors
   /* --------------------------------------------- Blink ---------------------------------------------
   Version 0.1
@@ -706,4 +612,4 @@ void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard 
   		delay(Blink_Timer_Marker);
   	}
   }
-} // End Marfor - Error_Blink
+} // End Marfor - Error_Blink With Pin number

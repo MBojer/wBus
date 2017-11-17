@@ -24,7 +24,6 @@
 #include <avr/interrupt.h>
 #include <compat/twi.h>
 #include "Arduino.h" // for digitalWrite
-#include <util/delay.h>
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -478,30 +477,4 @@ SIGNAL(TWI_vect) {
       twi_stop();
       break;
   }
-}
-
-
-unsigned char twi_kill( void ) {
-  /*---------------------------------------------------------------
-  Function for generating a TWI Stop Condition. Used to release
-  the TWI bus.
-  ---------------------------------------------------------------*/
-  #define PIN_USI             PINE
-  #define PORT_USI            PORTE
-  #define PORT_USI_SDA        PORTE5
-  #define PORT_USI_SCL        PORTE4
-  #define PIN_USI_SDA         PINE5
-  #define PIN_USI_SCL         PINE4
-  #define T2_TWI    5 		// >4,7us
-  #define T4_TWI    4 		// >4,0us
-
-  PORT_USI &= ~(1<<PIN_USI_SDA);           // Pull SDA low.
-  PORT_USI |= (1<<PIN_USI_SCL);            // Release SCL.
-  while( !(PIN_USI & (1<<PIN_USI_SCL)) );  // Wait for SCL to go high.
-	_delay_us(T4_TWI);
-  PORT_USI |= (1<<PIN_USI_SDA);            // Release SDA.
-	_delay_us(T2_TWI);
-
-  return 1;
-
 }

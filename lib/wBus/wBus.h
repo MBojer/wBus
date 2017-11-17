@@ -45,7 +45,6 @@ Network for made to run on the I2C bus using broadcast
       void onReceive( void (*)(int) );
       void onRequest( void (*)(void) );
       void pullup(bool Activate);
-      void stop();
 
       using Print::write; // Change ME / REMOVE ME
 
@@ -72,7 +71,8 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- Misc ---------------------------------------------
 
       void Boot_Message();
-      void Blink_LED(int Number_Of_Blinks, int LED_Pin = 13);
+      void Blink_LED(int Number_Of_Blinks);
+      void Blink_LED(int Number_Of_Blinks, int LED_Pin);
       int _Script_Loop_Delay = false;
 
 

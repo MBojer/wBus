@@ -49,6 +49,5 @@
   void twi_stop(void);
   void twi_releaseBus(void);
   uint8_t twi_tout(uint8_t);
-  unsigned char twi_kill( void );
-
+  
 #endif
