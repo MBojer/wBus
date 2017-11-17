@@ -111,6 +111,8 @@ Network for made to run on the I2C bus using broadcast
       int _Device_ID_Check_OK_Counter; // Used for Device ID check at boot to make sure the other device have time to send
       // int _Queue_Device_ID_Check_Hit = false; // Look below int defined there just here as a reminder
       bool _Queue_Device_ID_Check_Hit;
+      unsigned long _Device_ID_Millis_Start = 0;
+      unsigned long _Device_ID_Millis_Interval = 1500;
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------

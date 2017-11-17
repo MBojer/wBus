@@ -30,7 +30,7 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 	_Log_To_Serial = Log_To_Serial;
 	_Serial_Speed = Serial_Speed;
 
-  _Device_ID_Check_OK_Counter = round(Loop_Delay / 75);
+  _Device_ID_Check_OK_Counter = round(Loop_Delay / 50);
 
   _Script_Loop_Delay = Loop_Delay;
 
@@ -101,18 +101,32 @@ int WBus::broadcast(String Broadcast_String) {
 
 	int I2C_BUS_Responce;
 
-	beginTransmission(0);  // broadcast to all
-	write(Broadcast_String.c_str());
-	I2C_BUS_Responce = endTransmission();
+  for (int x = 0; x < 3; x++) {
 
-	if (I2C_BUS_Responce == 0) { // REMOVE ME
-		Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
-    return 0;
-	} // REMOVE ME
+    beginTransmission(0);  // broadcast to all
+    write(Broadcast_String.c_str());
+    I2C_BUS_Responce = endTransmission();
 
-	I2C_BUS_Error(I2C_BUS_Responce);
-  return I2C_BUS_Responce;
+    if (I2C_BUS_Responce == 0) { // REMOVE ME
+      Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
+      return 0;
+    } // REMOVE ME
 
+    I2C_BUS_Error(I2C_BUS_Responce);
+
+    if (I2C_BUS_Responce != 0) { // Returns if 0  -  0 = No error
+      return I2C_BUS_Responce;
+    }
+
+    else {
+      Serial.println("Retransmitting: " + Broadcast_String); // REMOVE ME
+    }
+
+    Serial.println("x: " + String(x));
+    delay(250);
+  }
+
+  return 0;
 } // End marker for Broadcast
 
 uint8_t WBus::endTransmission(void) {
@@ -291,83 +305,89 @@ int WBus::Device_ID_Check() {
         1 = Check done and passed
         2 = Error
         3 = Waiting for reply
+
   */
 
-  Serial.println("Device_ID_Check"); // REMOVE ME
-  Serial.println(_Device_ID_Check_OK); // REMOVE ME
-
-  if (_Device_ID_Check_OK == 0) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  if (_Device_ID_Check_OK == 0) { // 0 = Not done
     broadcast(String(_Device_ID) + "DD");
     _Device_ID_Check_OK = 3;
     return 3;
   }
 
-  else if (_Device_ID_Check_OK == 1) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 1) { // 1 = Done and OK
 
     if (_Queue_Device_ID_Check_Hit == true) {
       /*
-          Command_Queue_Push have put *"DD" (Device ID check request) in the Queue
-          checking if the device id matches the units and if so replied *"DX"
-          *"DX" will make the other device enter error state and change ID to "110"
+          Command_Queue_Push have put (Device_ID)"DD" (Device ID check request) in the Queue.
+
+          Checking if the device id matches this units Device ID and if so replied (Device_ID)"DD"
+
+          (Device_ID)"DD" will make the other device enter error state and change ID to "110"
       */
 
-      if (Queue_Search_Pop(String(String(_Device_ID) + "DD"), true) != ";") {
-        broadcast(String(_Device_ID) + "DX");
+      if (Queue_Search_Pop(String(String(_Device_ID) + "DD"), true) != ";") { // Another device send duplicate Device ID
+        broadcast(String(_Device_ID) + "DD");
         // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
         _Queue_Device_ID_Check_Hit = false;
         return 1;
-      } // Hit ducplicate device id found
+      }
 
-      else {
+      else { // Clears the Queue of DD
         Serial.println("Clear queue"); // REMOVE ME
         Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
-        Queue_Search_Pop("DX", true); // Clears the queue for device id check replys
         _Queue_Device_ID_Check_Hit = false;
         return 1;
-      } // Clear queue for Device ID requests
-    }
+        } // Clear queue for Device ID requests
+
+    } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
 
     return 1;
-  }
+  } // END MARKER - else if (_Device_ID_Check_OK == 1)
 
-  else if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
+  else if (_Device_ID_Check_OK == 2) { // 2 = Failed
       return 2;
   }
 
-  else if (_Device_ID_Check_OK == 3 && _Queue_Device_ID_Check_Hit == true) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
-    _Device_ID_Check_OK_Counter--;
-    Serial.println("_Device_ID_Check_OK_Counter--");
+  else if (_Device_ID_Check_OK == 3) { // 3 = Waiting for reply
 
-    if (Queue_Search_Peek("DX") != ";") { // Device ID Check failed going to error state
-      _Device_ID_Check_OK = 2;
-      _I2C_Bus_Error = 1;
-      // Queue_Clear();
-      Serial.println("ERROR: Duplicate Device ID found, going into Error_Mode");
-      return 2;
+    if (_Queue_Device_ID_Check_Hit == true) {
+      if (Queue_Search_Peek(String(_Device_ID) + "DD") != ";") { // Device ID Check failed going to error state
+        _Device_ID_Check_OK = 2;
+        _I2C_Bus_Error = 1;
+        // Queue_Clear();
+        Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+        return 2;
+      }
     }
 
-    else if (_Device_ID_Check_OK_Counter == 0) { // Done no reply on "DD" assuming device id unique
+
+    else if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
       Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
       _Device_ID_Check_OK = 1;
       return 1;
     }
 
     else { // No reply broadcasting device ID again
-      delay(100);
-      broadcast(String(_Device_ID) + "DD");
+
+      if (_Device_ID_Millis_Start == 0) {
+        _Device_ID_Millis_Start = millis();
+        broadcast(String(_Device_ID) + "DD");
+      }
+
+      else if ((unsigned long)(millis() - _Device_ID_Millis_Start) >= _Device_ID_Millis_Interval) {
+        _Device_ID_Millis_Start = millis();
+        broadcast(String(_Device_ID) + "DD");
+        _Device_ID_Check_OK_Counter--;
+      }
+
       return 3;
     }
 
   }
 
+  Serial.println("Device_ID_Check - End"); // REMOVE ME
 
-
-
-
-
-  Serial.println("Device_ID_Check - End");
-
-  return 3;
+  return 4;
 
 
 
@@ -414,11 +434,8 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
   if (_I2C_Bus_Error != 0) { // Error on I2C bus disabling Queue_Push
-    Serial.println("_I2C_Bus_Error == 0"); // REMOVE ME
     return;
   }
-
-  Serial.println("MARKER 987"); // REMOVE ME
 
   if (Push_String.indexOf("DD") <= 0) {
     Serial.println("Push_String.indexOf(DD) <= 0)"); // REMOVE ME
@@ -433,7 +450,7 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 	}
 
 	else {
-    Serial.println("_Queue_Is_Empthy else "); // REMOVE ME
+    Serial.println("_Queue_Is_Empthy not empthey"); // REMOVE ME
 		_Queue_String = _Queue_String + Push_String + ";";
 		_Queue_Length++;
 		_Queue_Is_Empthy = false;
@@ -444,6 +461,7 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 		_Queue_String = ";";
 		_Queue_Length = 0;
 		_Queue_Is_Empthy = true;
+    _Queue_Device_ID_Check_Hit = false;
 		// CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 	}
 
@@ -453,20 +471,15 @@ String WBus::Queue_Pop() {
 
 			String Pop_String;
 
-
 			if (_Queue_Is_Empthy == true) {
 				return ";";
 			}
 
-
 			else {
-
 				Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(";"));
 
 				_Queue_String.remove(0, _Queue_String.indexOf(";") + 1);
-
 				_Queue_Length--;
-
 
 				if (_Queue_String.length() <= 3 || _Queue_Length < 1) {
 					_Queue_String = ";";
@@ -474,11 +487,9 @@ String WBus::Queue_Pop() {
 					_Queue_Is_Empthy = true;
 				}
 
-
 				return Pop_String;
 
 			} // End Marker for Else
-
 } // End Marker for POP
 
 String WBus::Queue_Peek() {
@@ -588,11 +599,9 @@ void WBus::Boot_Message() { // Displays a boot message if included
 	}
 } // End marker for Boot_Message
 
-
 void WBus::Blink_LED(int Number_Of_Blinks) { // Blinks the onboard LED to indicate errors
   Blink_LED(Number_Of_Blinks, 13); // 13 is the onboard LED
 } // End Marfor - Error_Blink With Pin number
-
 
 void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard LED to indicate errors
   /* --------------------------------------------- Blink ---------------------------------------------
