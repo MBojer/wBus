@@ -8,7 +8,7 @@ unsigned int Counter;
 
 String I2C_Receive_Data;
 
-int I2C_Address = 11;
+int I2C_Address = 12;
 
 int I2C_BUS_Responce;
 
@@ -70,7 +70,7 @@ void loop() {
   }
 
   if (Counter % 7 == 0) {
-    wBus.broadcast("Mega1: " + String(Counter));
+    wBus.broadcast("Mega2: " + String(Counter));
   }
 
 
