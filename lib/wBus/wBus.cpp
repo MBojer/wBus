@@ -340,9 +340,9 @@ int WBus::Device_ID_Check() {
     _Device_ID_Check_OK_Counter--;
 
     if (Queue_Search_Pop(String(String(_Device_ID) + "DX"), true) != ";") { // Device ID Check failed going to error state
-      Queue_Clear();
       _Device_ID_Check_OK = 2;
       _I2C_Bus_Error = 1;
+      Queue_Clear();
       return 2;
     }
 
@@ -412,7 +412,7 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 
 void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
 
-  if (_I2C_Bus_Error == 0) { // Error on I2C bus disabling Queue_Push
+  if (_I2C_Bus_Error != 0) { // Error on I2C bus disabling Queue_Push
     Serial.println("_I2C_Bus_Error == 0"); // REMOVE ME
     return;
   }
