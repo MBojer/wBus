@@ -280,6 +280,15 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
   }
 }
 
+void WBus::stop() {
+
+  Serial.println("wBus - Stop - Stop"); // REMOVE ME
+  twi_stop();
+  Serial.println("wBus - Stop - RelaseBus"); // REMOVE ME
+  twi_releaseBus();
+
+}
+
 
 
 // --------------------------------------------- WBus ---------------------------------------------
@@ -332,8 +341,13 @@ int WBus::Device_ID_Check() {
   }
 
   if (_Device_ID_Check_OK == 2) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
-    _I2C_Bus_Error = true;
-    return 2;
+    if (_I2C_Bus_Error == false) {
+      stop();
+      _I2C_Bus_Error = true;
+      return 2;
+    }
+
+      return 2;
   }
 
   if (_Device_ID_Check_OK == 3) { // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply

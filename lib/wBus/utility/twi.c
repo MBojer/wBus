@@ -335,8 +335,7 @@ void twi_releaseBus(void)
 
 //Nirea. Time Out
 static volatile uint32_t twi_toutc;
-uint8_t twi_tout(uint8_t ini)
-{
+uint8_t twi_tout(uint8_t ini) {
 	if (ini) twi_toutc=0; else twi_toutc++;
 	if (twi_toutc>=100000UL) {
 		twi_toutc=0;
@@ -346,8 +345,7 @@ uint8_t twi_tout(uint8_t ini)
     return 0;
 }
 
-SIGNAL(TWI_vect)
-{
+SIGNAL(TWI_vect) {
   switch(TW_STATUS){
     // All Master
     case TW_START:     // sent start condition
