@@ -71,7 +71,7 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- Misc ---------------------------------------------
 
       void Boot_Message();
-      void Blink_LED();
+      int Blink_LED(bool Read_Value_Only);
       void Blink_LED_Start(int Number_Of_Blinks);
       void Blink_LED_Start(int Number_Of_Blinks, int LED_Pin);
       void Blink_LED_Stop();
@@ -125,16 +125,12 @@ Network for made to run on the I2C bus using broadcast
 
 
       // --------------------------------------------- Blink LED ---------------------------------------------
-      int _Blink_LED_Blink_Left = 0;
-      unsigned long _Blink_LED_Millis_Start = 0;
+      int _Blink_LED_Blinks_Left = 0;
+
+      unsigned long _Blink_LED_Millis_Start_At = 0;
       unsigned long _Blink_LED_Millis_Interval = 500;
+      unsigned long _Blink_LED_Millis_Interval_Break = 1500;
 
-      int _Blink_LED_Indicator_Blink_Left = 3;
-      bool _Blink_LED_Indicator_Blink = true;
-      unsigned long _Blink_LED_Millis_Indicator_Start = 0;
-      unsigned long _Blink_LED_Millis_Indicator_Interval = 75;
-
-      unsigned long _Blink_LED_Millis_Stop;
 
       int _Blink_LED_Pin;
 
