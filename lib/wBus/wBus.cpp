@@ -27,8 +27,8 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 
   _Max_Queue_Length = Max_Queue_Length;
 
-	_Log_To_Serial = Log_To_Serial;
-	_Serial_Speed = Serial_Speed;
+  _Log_To_Serial = Log_To_Serial;
+  _Serial_Speed = Serial_Speed;
 
   _Device_ID_Check_OK_Counter = round(Loop_Delay / 50);
 
@@ -94,12 +94,12 @@ void WBus::beginTransmission(int address) {
 
 int WBus::broadcast(String Broadcast_String) {
 
-	/* ------------------------------ Broadcast ------------------------------
-	Version 0.1
-	Broadcasts information to the I2C network
-	*/
+  /* ------------------------------ Broadcast ------------------------------
+  Version 0.1
+  Broadcasts information to the I2C network
+  */
 
-	int I2C_BUS_Responce;
+  int I2C_BUS_Responce;
 
   for (int x = 0; x < 3; x++) {
 
@@ -163,7 +163,7 @@ size_t WBus::write(uint8_t data) {
   // slave tx event callback
   // or after beginTransmission(address)
   if(transmitting){
-  // in master transmitter mode
+    // in master transmitter mode
     // don't bother if buffer is full
     if(txBufferLength >= BUFFER_LENGTH){
       setWriteError();
@@ -175,7 +175,7 @@ size_t WBus::write(uint8_t data) {
     // update amount in buffer
     txBufferLength = txBufferIndex;
   }else{
-  // in slave send mode
+    // in slave send mode
     // reply to master
     twi_transmit(&data, 1);
   }
@@ -187,12 +187,12 @@ size_t WBus::write(const uint8_t *data, size_t quantity) {
   // slave tx event callback
   // or after beginTransmission(address)
   if(transmitting){
-  // in master transmitter mode
+    // in master transmitter mode
     for(size_t i = 0; i < quantity; ++i){
       write(data[i]);
     }
   }else{
-  // in slave send mode
+    // in slave send mode
     // reply to master
     twi_transmit(data, quantity);
   }
@@ -301,10 +301,10 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
 int WBus::Device_ID_Check() {
 
   /*
-        0 = Not Done
-        1 = Check done and passed
-        2 = Error
-        3 = Waiting for reply
+  0 = Not Done
+  1 = Check done and passed
+  2 = Error
+  3 = Waiting for reply
 
   */
 
@@ -318,14 +318,14 @@ int WBus::Device_ID_Check() {
 
     if (_Queue_Device_ID_Check_Hit == true) {
       /*
-          Command_Queue_Push have put (Device_ID)"DD" (Device ID check request) in the Queue.
+      Command_Queue_Push have put (Device_ID)"DD" (Device ID check request) in the Queue.
 
-          Checking if the device id matches this units Device ID and if so replied (Device_ID)"DD"
+      Checking if the device id matches this units Device ID and if so replied (Device_ID)"DD"
 
-          (Device_ID)"DD" will make the other device enter error state and change ID to "110"
+      (Device_ID)"DD" will make the other device enter error state and change ID to "110"
       */
 
-      if (Queue_Search_Pop(String(String(_Device_ID) + "DD"), true) != ";") { // Another device send duplicate Device ID
+      if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Another device send duplicate Device ID
         broadcast(String(_Device_ID) + "DD");
         // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
         _Queue_Device_ID_Check_Hit = false;
@@ -337,7 +337,7 @@ int WBus::Device_ID_Check() {
         Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
         _Queue_Device_ID_Check_Hit = false;
         return 1;
-        } // Clear queue for Device ID requests
+      } // Clear queue for Device ID requests
 
     } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
 
@@ -345,79 +345,78 @@ int WBus::Device_ID_Check() {
   } // END MARKER - else if (_Device_ID_Check_OK == 1)
 
   else if (_Device_ID_Check_OK == 2) { // 2 = Failed
-      return 2;
+    return 2;
   }
 
-  else if (_Device_ID_Check_OK == 3) { // 3 = Waiting for reply
+  else { // 3 = Waiting for reply
 
     if (_Queue_Device_ID_Check_Hit == true) { // "DD" in queue "DD" Symbolizes and Device_ID check
-      if (Queue_Search_Peek(String(_Device_ID) + "DD") != ";") { // Device ID Check failed going to error state
-        _Device_ID_Check_OK = 2;
-        _I2C_Bus_Error = 1;
-        Queue_Clear();
-        Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
-        // begin(110); // CHAMGE ME
-        // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
-        return 2;
-      }
+    if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
+      _Device_ID_Check_OK = 2;
+      _I2C_Bus_Error = 1;
+      Queue_Clear();
+      Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+      // begin(110); // CHAMGE ME - working here
+      // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
+      return 2;
     }
+  }
 
-    if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
-      Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
-      _Device_ID_Check_OK = 1;
-      return 1;
-    }
+  else if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
+  Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
+  _Device_ID_Check_OK = 1;
+  return 1;
+}
 
-    else { // No reply broadcasting device ID again
+else { // No reply broadcasting device ID again
 
-      if (_Device_ID_Millis_Start == 0) {
-        _Device_ID_Millis_Start = millis();
-        broadcast(String(_Device_ID) + "DD");
-      }
+  if (_Device_ID_Millis_Start == 0) {
+    _Device_ID_Millis_Start = millis();
+    broadcast(String(_Device_ID) + "DD");
+  }
 
-      else if ((unsigned long)(millis() - _Device_ID_Millis_Start) >= _Device_ID_Millis_Interval) {
-        _Device_ID_Millis_Start = millis();
-        broadcast(String(_Device_ID) + "DD");
-        _Device_ID_Check_OK_Counter--;
-      }
+  else if ((unsigned long)(millis() - _Device_ID_Millis_Start) >= _Device_ID_Millis_Interval) {
+    _Device_ID_Millis_Start = millis();
+    broadcast(String(_Device_ID) + "DD");
+    _Device_ID_Check_OK_Counter--;
+  }
+  return 3;
+}
+} // END MARKER - else if (_Device_ID_Check_OK == 3)
 
-      return 3;
-    }
-  } // END MARKER - else if (_Device_ID_Check_OK == 3)
-return 3;
 } // END MARKER - Device_ID
 
 void WBus::I2C_BUS_Error(int Error_Number) {
 
-	if (Error_Number == 1) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
-	}
+  if (Error_Number == 1) { // represents an Error not useing the address just to be safe
+    Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
+  }
 
-	else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 2: Received NACK on transmit of address");
-	}
+  else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
+    Serial.println("I2C Error 2: Received NACK on transmit of address");
+  }
 
-	else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error 3: Received NACK on transmit of data");
-	}
+  else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
+    Serial.println("I2C Error 3: Received NACK on transmit of data");
+  }
 
-	else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
-		Serial.println(String("I2C BUS error on address: ") + String(_Device_ID));
-	}
+  else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
+    Serial.println(String("I2C BUS error on address: ") + String(_Device_ID));
+  }
 
-	else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master");
-	}
+  else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
+    Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master");
+  }
 
-	else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
-		Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent");
-	}
+  else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
+    Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent");
+  }
 
-	else { // Above 6 is reserved for later errors
-		Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
-	}
+  else { // Above 6 is reserved for later errors
+    Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
+  }
 
-	return;
+  return;
 
 } // End Marker - I2C_Error_Print
 
@@ -435,140 +434,140 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
     _Queue_Device_ID_Check_Hit = true;
   }
 
-	if (_Queue_Is_Empthy == true) {
-		_Queue_String = Push_String + ";";
-		_Queue_Length = 1;
-		_Queue_Is_Empthy = false;
-	}
+  if (_Queue_Is_Empthy == true) {
+    _Queue_String = Push_String + ";";
+    _Queue_Length = 1;
+    _Queue_Is_Empthy = false;
+  }
 
-	else {
-		_Queue_String = _Queue_String + Push_String + ";";
-		_Queue_Length++;
-		_Queue_Is_Empthy = false;
-	}
+  else {
+    _Queue_String = _Queue_String + Push_String + ";";
+    _Queue_Length++;
+    _Queue_Is_Empthy = false;
+  }
 
-	if (_Queue_Length >= _Max_Queue_Length) {
-		Serial.println("ERROR: Max_Queue_Length reached, clearing command queue"); // CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		_Queue_String = ";";
-		_Queue_Length = 0;
-		_Queue_Is_Empthy = true;
+  if (_Queue_Length >= _Max_Queue_Length) {
+    Serial.println("ERROR: Max_Queue_Length reached, clearing command queue"); // CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    _Queue_String = ";";
+    _Queue_Length = 0;
+    _Queue_Is_Empthy = true;
     _Queue_Device_ID_Check_Hit = false;
-		// CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-	}
+    // CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+  }
 
 } // End Marker for Push
 
 String WBus::Queue_Pop() {
 
-			String Pop_String;
+  String Pop_String;
 
-			if (_Queue_Is_Empthy == true) {
-				return ";";
-			}
+  if (_Queue_Is_Empthy == true) {
+    return ";";
+  }
 
-			else {
-				Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(";"));
+  else {
+    Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(";"));
 
-				_Queue_String.remove(0, _Queue_String.indexOf(";") + 1);
-				_Queue_Length--;
+    _Queue_String.remove(0, _Queue_String.indexOf(";") + 1);
+    _Queue_Length--;
 
-				if (_Queue_String.length() <= 3 || _Queue_Length < 1) {
-					_Queue_String = ";";
-					_Queue_Length = 0;
-					_Queue_Is_Empthy = true;
-				}
+    if (_Queue_String.length() <= 3 || _Queue_Length < 1) {
+      _Queue_String = ";";
+      _Queue_Length = 0;
+      _Queue_Is_Empthy = true;
+    }
 
-				return Pop_String;
+    return Pop_String;
 
-			} // End Marker for Else
+  } // End Marker for Else
 } // End Marker for POP
 
 String WBus::Queue_Peek() {
 
-			if (_Queue_String == ";") {
-				return ";";
-			}
+  if (_Queue_String == ";") {
+    return ";";
+  }
 
-			else {
-				return _Queue_String.substring(0, _Queue_String.indexOf(";"));
-			}
+  else {
+    return _Queue_String.substring(0, _Queue_String.indexOf(";"));
+  }
 
 }// End Marker for Peek
 
 String WBus::Queue_Peek_Queue() {
-			return _Queue_String;
+  return _Queue_String;
 }
 
 int WBus::Queue_Length() {
-			return _Queue_Length;
+  return _Queue_Length;
 }
 
 int WBus::Queue_Is_Empthy() {
-			return _Queue_Is_Empthy;
+  return _Queue_Is_Empthy;
 }
 
 void WBus::Queue_Clear() {
-			_Queue_String = ";";
-			_Queue_Length = 0;
-			_Queue_Is_Empthy = true;
+  _Queue_String = ";";
+  _Queue_Length = 0;
+  _Queue_Is_Empthy = true;
 }
 
 String WBus::Queue_Search_Peek(String Search_String) {
 
-			if (_Queue_String.indexOf(Search_String) >= 0) {
+  if (_Queue_String.indexOf(Search_String) >= 0) {
 
-				String Search_Peek_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
+    String Search_Peek_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
 
-				if (Search_Peek_String.indexOf(";") <= 0) {
-					return Search_Peek_String;
-				}
+    if (Search_Peek_String.indexOf(";") <= 0) {
+      return Search_Peek_String;
+    }
 
-				else {
-					Search_Peek_String = Search_Peek_String.substring(Search_Peek_String.lastIndexOf(";") + 1, Search_Peek_String.length());
-					return Search_Peek_String;
-				}
-			}
+    else {
+      Search_Peek_String = Search_Peek_String.substring(Search_Peek_String.lastIndexOf(";") + 1, Search_Peek_String.length());
+      return Search_Peek_String;
+    }
+  }
 
-			return ";";
+  return ";";
 }
 
 String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
-			if (_Queue_String.indexOf(Search_String) >= 0) {
-				String Search_Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
+  if (_Queue_String.indexOf(Search_String) >= 0) {
+    String Search_Pop_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_String) + Search_String.length());
 
-				if (Search_Pop_String.indexOf(";") <= 0) {
-					_Queue_String = _Queue_String.substring(Search_Pop_String.length() + 1);
-				}
-
-
-				else {
-					Search_Pop_String = Search_Pop_String.substring(Search_Pop_String.lastIndexOf(";") + 1, Search_Pop_String.length());
-
-					_Queue_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_Pop_String)) + _Queue_String.substring(_Queue_String.indexOf(Search_Pop_String) + Search_Pop_String.length() + 1 , _Queue_String.length());
-				}
-
-				_Queue_Length--;
+    if (Search_Pop_String.indexOf(";") <= 0) {
+      _Queue_String = _Queue_String.substring(Search_Pop_String.length() + 1);
+    }
 
 
-				if (Delete_All_Matches == true) {
-					_Queue_String.replace(Search_Pop_String + ";", "");
+    else {
+      Search_Pop_String = Search_Pop_String.substring(Search_Pop_String.lastIndexOf(";") + 1, Search_Pop_String.length());
 
-					_Queue_Length = _Queue_String.indexOf(";") + 1;
-				}
+      _Queue_String = _Queue_String.substring(0, _Queue_String.indexOf(Search_Pop_String)) + _Queue_String.substring(_Queue_String.indexOf(Search_Pop_String) + Search_Pop_String.length() + 1 , _Queue_String.length());
+    }
+
+    _Queue_Length--;
 
 
-				if (_Queue_String.length() <= 3 || _Queue_Length < 1) {
-					_Queue_String = ";";
-					_Queue_Length = 0;
-					_Queue_Is_Empthy = true;
-				}
+    if (Delete_All_Matches == true) {
+      _Queue_String.replace(Search_Pop_String + ";", "");
 
-				return Search_Pop_String;
+      _Queue_Length = _Queue_String.indexOf(";") + 1;
+    }
 
-			}
 
-			return ";";
+    if (_Queue_String.length() <= 3 || _Queue_Length < 1) {
+      _Queue_String = ";";
+      _Queue_Length = 0;
+      _Queue_Is_Empthy = true;
+    }
+
+    return Search_Pop_String;
+
+  }
+
+  return ";";
 }
 
 
@@ -577,51 +576,82 @@ String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
 void WBus::Boot_Message() { // Displays a boot message if included
 
-	if (_Log_To_Serial == true && (Serial)) {
+  if (_Log_To_Serial == true && (Serial)) {
 
-		if (_Serial_Speed != 0) {
-			Serial.begin(_Serial_Speed);
-		}
+    if (_Serial_Speed != 0) {
+      Serial.begin(_Serial_Speed);
+    }
 
-		Serial.println("");
-		Serial.println("Including wBus v0.1");
-		Serial.println("Using BUS Address: " + String(_Device_ID));
-
-	}
+    Serial.println("");
+    Serial.println("Including wBus v0.1");
+    Serial.println("Using BUS Address: " + String(_Device_ID));
+  }
 } // End marker for Boot_Message
 
-void WBus::Blink_LED(int Number_Of_Blinks) { // Blinks the onboard LED to indicate errors
-  Blink_LED(Number_Of_Blinks, 13); // 13 is the onboard LED
-} // End Marfor - Error_Blink With Pin number
 
-void WBus::Blink_LED(int Number_Of_Blinks, int LED_Pin) { // Blinks the onboard LED to indicate errors
+
+
+int WBus::Blink_LED(bool Read_Value_Only) { // Blinks the onboard LED to indicate errors
   /* --------------------------------------------- Blink ---------------------------------------------
   Version 0.1
   Blinks :-P
   */
 
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  int Blink_Timer = 500;
-  int Blink_Timer_Marker = 75;
-
-  for (int x = 1; x < Number_Of_Blinks + 1; x++) {
-
-  	digitalWrite(LED_BUILTIN, HIGH);
-  	delay(Blink_Timer);
-  	digitalWrite(LED_BUILTIN, LOW);
-  	delay(Blink_Timer);
+  if (Read_Value_Only == true) {
+    return _Blink_LED_Blinks_Left;
   }
 
-  delay(Blink_Timer);
+  if (_Blink_LED_Blinks_Left == 0) {
+      return 0;
+  } // END MARKER - if (_Blink_LED_Blinks_Left == 0)
 
-  for (int x = 1; x < 4; x++) {
+  if (_Blink_LED_Millis_Start_At <= millis()) {
 
-  	digitalWrite(LED_BUILTIN, HIGH);
-  	delay(Blink_Timer_Marker);
-  	digitalWrite(LED_BUILTIN, LOW);
-  	if (x < 3) { // Done to make the Serial activity blink apear as the 3rd end or error blink
-  		delay(Blink_Timer_Marker);
-  	}
+    if (digitalRead(_Blink_LED_Pin) == LOW) { // LED ON
+      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
+      digitalWrite(_Blink_LED_Pin, HIGH);
+      return _Blink_LED_Blinks_Left;
+    }
+
+    else { // LED OFF
+      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
+      digitalWrite(_Blink_LED_Pin, LOW);
+
+      _Blink_LED_Blinks_Left--;
+
+      if (_Blink_LED_Blinks_Left == 0) {
+        _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval_Break;
+      }
+
+      return _Blink_LED_Blinks_Left;
+    }
+  } if (_Blink_LED_Millis_Start_At <= millis())
+
+  return _Blink_LED_Blinks_Left;
+}
+
+
+void WBus::Blink_LED_Start(int Number_Of_Blinks) {
+  Blink_LED_Start(Number_Of_Blinks, LED_BUILTIN);
+} // END MARKER - Blink_LED_Start
+
+void WBus::Blink_LED_Start(int Number_Of_Blinks, int LED_Pin) {
+
+  if (_Blink_LED_Millis_Start_At >= millis()) { // Dooing nothing, waiting on time between blinks to pass
+    return;
   }
-} // End Marfor - Error_Blink With Pin number
+
+  _Blink_LED_Pin = LED_Pin;
+
+  _Blink_LED_Blinks_Left = Number_Of_Blinks;
+
+  _Blink_LED_Millis_Start_At = millis();
+
+  pinMode(_Blink_LED_Pin, OUTPUT);
+
+} // END MARKER - Blink_LED_Start
+
+void WBus::Blink_LED_Stop() {
+  _Blink_LED_Blinks_Left = 0;
+  digitalWrite(_Blink_LED_Pin, LOW);
+} // END MARKER - Blink_LED_Stop

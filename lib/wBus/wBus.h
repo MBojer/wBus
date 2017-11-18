@@ -71,8 +71,10 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- Misc ---------------------------------------------
 
       void Boot_Message();
-      void Blink_LED(int Number_Of_Blinks);
-      void Blink_LED(int Number_Of_Blinks, int LED_Pin);
+      int Blink_LED(bool Read_Value_Only);
+      void Blink_LED_Start(int Number_Of_Blinks);
+      void Blink_LED_Start(int Number_Of_Blinks, int LED_Pin);
+      void Blink_LED_Stop();
       int _Script_Loop_Delay = false;
 
 
@@ -120,6 +122,19 @@ Network for made to run on the I2C bus using broadcast
       int _Queue_Length = 0;
       bool _Queue_Is_Empthy = true;
       String _Queue_String = ";"; // ";" is used as seperators betweens the string in the queue
+
+
+      // --------------------------------------------- Blink LED ---------------------------------------------
+      int _Blink_LED_Blinks_Left = 0;
+
+      unsigned long _Blink_LED_Millis_Start_At = 0;
+      unsigned long _Blink_LED_Millis_Interval = 500;
+      unsigned long _Blink_LED_Millis_Interval_Break = 1500;
+
+
+      int _Blink_LED_Pin;
+
+
 
   };
 
