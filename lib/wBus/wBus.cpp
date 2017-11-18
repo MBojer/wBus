@@ -18,6 +18,72 @@ extern "C" {
 #include "Arduino.h"
 #include "WBus.h"
 
+
+// --------------------------------------------- Blink LED ---------------------------------------------
+int WBus::Blink_LED(bool Read_Value_Only) { // Blinks the onboard LED to indicate errors
+  /* --------------------------------------------- Blink ---------------------------------------------
+  Version 0.1
+  Blinks :-P
+  */
+
+  if (Read_Value_Only == true) {
+    return _Blink_LED_Blinks_Left;
+  }
+
+  if (_Blink_LED_Blinks_Left == 0) {
+      return 0;
+  } // END MARKER - if (_Blink_LED_Blinks_Left == 0)
+
+  if (_Blink_LED_Millis_Start_At <= millis()) {
+
+    if (digitalRead(_Blink_LED_Pin) == LOW) { // LED ON
+      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
+      digitalWrite(_Blink_LED_Pin, HIGH);
+      return _Blink_LED_Blinks_Left;
+    }
+
+    else { // LED OFF
+      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
+      digitalWrite(_Blink_LED_Pin, LOW);
+
+      _Blink_LED_Blinks_Left--;
+
+      if (_Blink_LED_Blinks_Left == 0) {
+        _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval_Break;
+      }
+
+      return _Blink_LED_Blinks_Left;
+    }
+  } // END MARKER - if (_Blink_LED_Millis_Start_At <= millis()) {
+
+  return _Blink_LED_Blinks_Left;
+} // END MARKER - Blink_LED(bool Read_Value_Only)
+
+void WBus::Blink_LED_Start(int Number_Of_Blinks) {
+  Blink_LED_Start(Number_Of_Blinks, LED_BUILTIN);
+} // END MARKER - Blink_LED_Start
+
+void WBus::Blink_LED_Start(int Number_Of_Blinks, int LED_Pin) {
+
+  if (_Blink_LED_Millis_Start_At >= millis()) { // Dooing nothing, waiting on time between blinks to pass
+    return;
+  }
+
+  _Blink_LED_Pin = LED_Pin;
+
+  _Blink_LED_Blinks_Left = Number_Of_Blinks;
+
+  _Blink_LED_Millis_Start_At = millis();
+
+  pinMode(_Blink_LED_Pin, OUTPUT);
+
+} // END MARKER - Blink_LED_Start
+
+void WBus::Blink_LED_Stop() {
+  _Blink_LED_Blinks_Left = 0;
+  digitalWrite(_Blink_LED_Pin, LOW);
+} // END MARKER - Blink_LED_Stop
+
 // --------------------------------------------- Setup ---------------------------------------------
 
 WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed, int Loop_Delay) {
@@ -383,7 +449,7 @@ int WBus::Device_ID_Check() {
 
     return 3;
     }
-    
+
   } // END MARKER - else if (_Device_ID_Check_OK == 3)
 
 } // END MARKER - Device_ID
