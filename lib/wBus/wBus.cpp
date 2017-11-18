@@ -350,39 +350,41 @@ int WBus::Device_ID_Check() {
 
   else { // 3 = Waiting for reply
 
-    if (_Queue_Device_ID_Check_Hit == true) { // "DD" in queue "DD" Symbolizes and Device_ID check
-    if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
-      _Device_ID_Check_OK = 2;
-      _I2C_Bus_Error = 1;
-      Queue_Clear();
-      Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
-      // begin(110); // CHAMGE ME - working here
-      // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
-      return 2;
+  if (_Queue_Device_ID_Check_Hit == true) { // "DD" in queue "DD" Symbolizes and Device_ID check
+      if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
+        _Device_ID_Check_OK = 2;
+        _I2C_Bus_Error = 1;
+        Queue_Clear();
+        Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+        // begin(110); // CHAMGE ME - working here
+        // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
+        return 2;
+      }
     }
-  }
 
   else if (_Device_ID_Check_OK_Counter <= 0) { // Done no reply on "DD" assuming device id unique
-  Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
-  _Device_ID_Check_OK = 1;
-  return 1;
-}
+      Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
+      _Device_ID_Check_OK = 1;
+      return 1;
+    }
 
-else { // No reply broadcasting device ID again
+  else { // No reply broadcasting device ID again
 
-  if (_Device_ID_Millis_Start == 0) {
-    _Device_ID_Millis_Start = millis();
-    broadcast(String(_Device_ID) + "DD");
-  }
+    if (_Device_ID_Millis_Start == 0) {
+      _Device_ID_Millis_Start = millis();
+      broadcast(String(_Device_ID) + "DD");
+    }
 
-  else if ((unsigned long)(millis() - _Device_ID_Millis_Start) >= _Device_ID_Millis_Interval) {
-    _Device_ID_Millis_Start = millis();
-    broadcast(String(_Device_ID) + "DD");
-    _Device_ID_Check_OK_Counter--;
-  }
-  return 3;
-}
-} // END MARKER - else if (_Device_ID_Check_OK == 3)
+    else if ((unsigned long)(millis() - _Device_ID_Millis_Start) >= _Device_ID_Millis_Interval) {
+      _Device_ID_Millis_Start = millis();
+      broadcast(String(_Device_ID) + "DD");
+      _Device_ID_Check_OK_Counter--;
+    }
+
+    return 3;
+    }
+    
+  } // END MARKER - else if (_Device_ID_Check_OK == 3)
 
 } // END MARKER - Device_ID
 
@@ -492,7 +494,7 @@ String WBus::Queue_Peek() {
     return _Queue_String.substring(0, _Queue_String.indexOf(";"));
   }
 
-}// End Marker for Peek
+} // End Marker for Peek
 
 String WBus::Queue_Peek_Queue() {
   return _Queue_String;
@@ -587,71 +589,3 @@ void WBus::Boot_Message() { // Displays a boot message if included
     Serial.println("Using BUS Address: " + String(_Device_ID));
   }
 } // End marker for Boot_Message
-
-
-
-
-int WBus::Blink_LED(bool Read_Value_Only) { // Blinks the onboard LED to indicate errors
-  /* --------------------------------------------- Blink ---------------------------------------------
-  Version 0.1
-  Blinks :-P
-  */
-
-  if (Read_Value_Only == true) {
-    return _Blink_LED_Blinks_Left;
-  }
-
-  if (_Blink_LED_Blinks_Left == 0) {
-      return 0;
-  } // END MARKER - if (_Blink_LED_Blinks_Left == 0)
-
-  if (_Blink_LED_Millis_Start_At <= millis()) {
-
-    if (digitalRead(_Blink_LED_Pin) == LOW) { // LED ON
-      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
-      digitalWrite(_Blink_LED_Pin, HIGH);
-      return _Blink_LED_Blinks_Left;
-    }
-
-    else { // LED OFF
-      _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval;
-      digitalWrite(_Blink_LED_Pin, LOW);
-
-      _Blink_LED_Blinks_Left--;
-
-      if (_Blink_LED_Blinks_Left == 0) {
-        _Blink_LED_Millis_Start_At = millis() + _Blink_LED_Millis_Interval_Break;
-      }
-
-      return _Blink_LED_Blinks_Left;
-    }
-  } if (_Blink_LED_Millis_Start_At <= millis())
-
-  return _Blink_LED_Blinks_Left;
-}
-
-
-void WBus::Blink_LED_Start(int Number_Of_Blinks) {
-  Blink_LED_Start(Number_Of_Blinks, LED_BUILTIN);
-} // END MARKER - Blink_LED_Start
-
-void WBus::Blink_LED_Start(int Number_Of_Blinks, int LED_Pin) {
-
-  if (_Blink_LED_Millis_Start_At >= millis()) { // Dooing nothing, waiting on time between blinks to pass
-    return;
-  }
-
-  _Blink_LED_Pin = LED_Pin;
-
-  _Blink_LED_Blinks_Left = Number_Of_Blinks;
-
-  _Blink_LED_Millis_Start_At = millis();
-
-  pinMode(_Blink_LED_Pin, OUTPUT);
-
-} // END MARKER - Blink_LED_Start
-
-void WBus::Blink_LED_Stop() {
-  _Blink_LED_Blinks_Left = 0;
-  digitalWrite(_Blink_LED_Pin, LOW);
-} // END MARKER - Blink_LED_Stop
