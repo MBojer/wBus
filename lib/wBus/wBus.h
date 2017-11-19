@@ -24,11 +24,11 @@ Network for made to run on the I2C bus using broadcast
 
       WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
 
- 
+
       // --------------------------------------------- Wire Functions ---------------------------------------------
 
       void begin();
-      void begin(uint8_t);
+      void begin(uint8_t); 
       void begin(int);
       void beginTransmission(uint8_t);
       void beginTransmission(int);
