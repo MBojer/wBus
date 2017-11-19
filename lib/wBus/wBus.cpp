@@ -18,6 +18,8 @@ extern "C" {
 #include "Arduino.h"
 #include "WBus.h"
 
+#include "MemoryFree.h" // REMOVE ME
+
 
 // --------------------------------------------- Setup ---------------------------------------------
 
@@ -305,8 +307,12 @@ int WBus::Device_ID_Check() {
 
   */
 
+
+
   if (_Device_ID_Check_OK == 0) { // 0 = Not done
-    broadcast(String(_Device_ID) + "DD");
+    if (broadcast(String(_Device_ID) + "DD") != 0) {
+      _Device_ID_Check_Error_Counter--;
+    }
     _Device_ID_Check_Millis_Start_At = millis();
     _Device_ID_Check_OK = 3;
     return 3;
@@ -324,7 +330,10 @@ int WBus::Device_ID_Check() {
       */
 
       if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Another device send duplicate Device ID
-        broadcast(String(_Device_ID) + "DD");
+        if (broadcast(String(_Device_ID) + "DD") != 0) {
+          _Device_ID_Check_Error_Counter--;
+        }
+
         // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
       }
 
@@ -360,18 +369,29 @@ int WBus::Device_ID_Check() {
 
     } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
 
-    else if (_Device_ID_Check_Checks_Left == 0) { // Done no reply on "DD" assuming device id unique
-        Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
-        _Device_ID_Check_OK = 1;
-        Queue_Search_Pop("DD", true); // Clears the queue for any DD messages
-        return 1;
+    else if (_Device_ID_Check_Checks_Left <= 0) { // Done no reply on "DD" assuming device id unique
+
+      if (_Device_ID_Check_Error_Counter <= 0) {
+        _Device_ID_Check_OK = 2;
+        _I2C_Bus_Error = 1; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+        Queue_Clear();
+        Serial.println("ERROR: All broadcasts failed, assuming I2C bus is down, entering error mode");
+        return 2;
       }
+
+      Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
+      _Device_ID_Check_OK = 1;
+      Queue_Search_Pop("DD", true); // Clears the queue for any DD messages
+      return 1;
+    }
 
     else { // No reply broadcasting device ID again
 
       if (_Blink_LED_Millis_Start_At <= millis()) {
         _Blink_LED_Millis_Start_At = millis() + _Device_ID_Check_Millis_Interval;
-        broadcast(String(_Device_ID) + "DD");
+        if (broadcast(String(_Device_ID) + "DD") != 0) {
+          _Device_ID_Check_Error_Counter--;
+        }
         _Device_ID_Check_Checks_Left--;
       }
 

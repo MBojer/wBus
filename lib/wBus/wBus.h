@@ -22,7 +22,7 @@ Network for made to run on the I2C bus using broadcast
 
       // --------------------------------------------- Setup ---------------------------------------------
 
-      WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
+      WBus(int I2C_Device_ID, , bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
 
 
       // --------------------------------------------- Wire Functions ---------------------------------------------
@@ -118,7 +118,8 @@ Network for made to run on the I2C bus using broadcast
       unsigned long _Device_ID_Check_Millis_Start_At = 0;
       unsigned long _Device_ID_Check_Millis_Interval = 1000;
 
-      int _Device_ID_Check_Checks_Left = 15; // A check consists of broadcasting the units Device ID and then checking for a 1 secound to see if you get a reply
+      int _Device_ID_Check_Checks_Left = 14; // A check consists of broadcasting the units Device ID and then checking for a 1 secound to see if you get a reply
+      int _Device_ID_Check_Error_Counter = _Device_ID_Check_Checks_Left + 1;
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------
