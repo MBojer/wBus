@@ -11,25 +11,24 @@ Network for made to run on the I2C bus using broadcast
   #include "Arduino.h"
 
   #include <inttypes.h>
-  #include "Stream.h"
+  #include "Stream.h" // Dont know why this is used for
 
+
+
+  // --------------------------------------------- #define ---------------------------------------------
   #ifndef TWI_BUFFER_LENGTH
     #define TWI_BUFFER_LENGTH 32
   #endif
 
+  #ifndef TWI_FREQ
+    #define TWI_FREQ 400000L
+  #endif
+
+
   // --------------------------------------------- TESTING START ---------------------------------------------
 
   #ifndef twi_h
-  #define twi_h
-
-    #include <inttypes.h>
-
-    //#define ATMEGA8
-
-    #ifndef TWI_FREQ
-    #define TWI_FREQ 400000L
-    #endif
-
+    #define twi_h
 
     #define TWI_READY 0
     #define TWI_MRX   1

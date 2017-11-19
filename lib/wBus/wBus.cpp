@@ -59,6 +59,10 @@ static volatile uint8_t twi_rxBufferIndex;
 
 static volatile uint8_t twi_error;
 
+
+
+
+
 void twi_init(void) {
   /*
   * Function twi_init
@@ -480,8 +484,6 @@ SIGNAL(TWI_vect) {
       break;
   }
 }
-
-
 
 
 
