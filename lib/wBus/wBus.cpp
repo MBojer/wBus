@@ -6,21 +6,23 @@ NOTE: Remember to change version number in Boot_Message
 */
 
 
-// --------------------------------------------- TESTING START ---------------------------------------------
+// --------------------------------------------- #include ---------------------------------------------
+#include "Arduino.h"
 
+  // --------------------------------------------- For TWI (Two Wire Interface) ---------------------------------------------
+  #include <math.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <inttypes.h>
+  #include <avr/io.h>
+  #include <avr/interrupt.h>
+  #include <compat/twi.h>
+  #include "pins_arduino.h"
 
+  // --------------------------------------------- wBus ---------------------------------------------
+  #include "wBus.h"
 
-
-#include <math.h>
-// #include <stdlib.h>
-#include <inttypes.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <compat/twi.h>
-#include "Arduino.h" // for digitalWrite
-#include "wBus.h"
-
-
+// --------------------------------------------- #define ---------------------------------------------
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #endif
@@ -29,10 +31,15 @@ NOTE: Remember to change version number in Boot_Message
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#include "pins_arduino.h"
+
+
+
+// --------------------------------------------- TESTING START ---------------------------------------------
+
+
+
 
 static volatile uint8_t trcase;//Nir
-
 static volatile uint8_t twi_state;
 static uint8_t twi_slarw;
 
@@ -491,19 +498,7 @@ SIGNAL(TWI_vect) {
 
 
 
-// --------------------------------------------- For TWI (Two Wire Interface) ---------------------------------------------
-extern "C" {
-  #include <stdlib.h>
-  #include <string.h>
-  #include <inttypes.h>
-}
 
-// --------------------------------------------- WBus ---------------------------------------------
-
-#include "Arduino.h"
-#include "WBus.h"
-
-// #include "MemoryFree.h" // REMOVE ME
 
 
 // --------------------------------------------- Setup ---------------------------------------------
@@ -528,12 +523,12 @@ WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bo
 
 // --------------------------------------------- Two Wire Interface ---------------------------------------------
 
-uint8_t WBus::rxBuffer[BUFFER_LENGTH];
+uint8_t WBus::rxBuffer[TWI_BUFFER_LENGTH];
 uint8_t WBus::rxBufferIndex = 0;
 uint8_t WBus::rxBufferLength = 0;
 
 uint8_t WBus::txAddress = 0;
-uint8_t WBus::txBuffer[BUFFER_LENGTH];
+uint8_t WBus::txBuffer[TWI_BUFFER_LENGTH];
 uint8_t WBus::txBufferIndex = 0;
 uint8_t WBus::txBufferLength = 0;
 
@@ -626,8 +621,8 @@ uint8_t WBus::endTransmission(void) {
 
 uint8_t WBus::requestFrom(uint8_t address, uint8_t quantity) {
   // clamp to buffer length
-  if(quantity > BUFFER_LENGTH){
-    quantity = BUFFER_LENGTH;
+  if(quantity > TWI_BUFFER_LENGTH){
+    quantity = TWI_BUFFER_LENGTH;
   }
   // perform blocking read into buffer
   uint8_t read = twi_readFrom(address, rxBuffer, quantity);
@@ -649,7 +644,7 @@ size_t WBus::write(uint8_t data) {
   if(transmitting){
     // in master transmitter mode
     // don't bother if buffer is full
-    if(txBufferLength >= BUFFER_LENGTH){
+    if(txBufferLength >= TWI_BUFFER_LENGTH){
       setWriteError();
       return 0;
     }

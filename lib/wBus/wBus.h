@@ -7,13 +7,14 @@ Network for made to run on the I2C bus using broadcast
 #ifndef WBus_h
   #define WBus_h
 
+  // --------------------------------------------- #include ---------------------------------------------
   #include "Arduino.h"
+
   #include <inttypes.h>
   #include "Stream.h"
-  #define BUFFER_LENGTH 32
 
   #ifndef TWI_BUFFER_LENGTH
-  #define TWI_BUFFER_LENGTH 32
+    #define TWI_BUFFER_LENGTH 32
   #endif
 
   // --------------------------------------------- TESTING START ---------------------------------------------
@@ -120,12 +121,12 @@ Network for made to run on the I2C bus using broadcast
     private:
       // --------------------------------------------- Two Wire Interface ---------------------------------------------
 
-      static uint8_t rxBuffer[BUFFER_LENGTH];
+      static uint8_t rxBuffer[TWI_BUFFER_LENGTH];
       static uint8_t rxBufferIndex;
       static uint8_t rxBufferLength;
 
       static uint8_t txAddress;
-      static uint8_t txBuffer[BUFFER_LENGTH];
+      static uint8_t txBuffer[TWI_BUFFER_LENGTH];
       static uint8_t txBufferIndex;
       static uint8_t txBufferLength;
 
