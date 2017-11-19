@@ -22,7 +22,7 @@ Network for made to run on the I2C bus using broadcast
 
       // --------------------------------------------- Setup ---------------------------------------------
 
-      WBus(int I2C_Device_ID, , bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
+      WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
 
 
       // --------------------------------------------- Wire Functions ---------------------------------------------
@@ -60,7 +60,7 @@ Network for made to run on the I2C bus using broadcast
       void Blink_LED_Start(int Number_Of_Blinks);
       void Blink_LED_Start(int Number_Of_Blinks, int LED_Pin);
       void Blink_LED_Stop();
-
+      int Blink_LED_Number_Of_Blinks();
 
       // --------------------------------------------- Queue ---------------------------------------------
 
@@ -102,7 +102,7 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- I2C Bus ---------------------------------------------
       int _Device_ID;
       bool _I2C_Internal_Pullup;
-      int _I2C_Bus_Error = 0; // 0 = OK  -  1 = Error - Failed Device ID check
+      int _I2C_Bus_Error = 0; // 0 = OK  -  All other numbers is the number of Error Bliks, see man.txt
 
 
       // --------------------------------------------- Serial ---------------------------------------------
@@ -116,10 +116,10 @@ Network for made to run on the I2C bus using broadcast
       bool _Queue_Device_ID_Check_Hit;
 
       unsigned long _Device_ID_Check_Millis_Start_At = 0;
-      unsigned long _Device_ID_Check_Millis_Interval = 1000;
+      unsigned long _Device_ID_Check_Millis_Interval = 2500;
 
-      int _Device_ID_Check_Checks_Left = 14; // A check consists of broadcasting the units Device ID and then checking for a 1 secound to see if you get a reply
-      int _Device_ID_Check_Error_Counter = _Device_ID_Check_Checks_Left + 1;
+      int _Device_ID_Check_Checks_Left = 6; // A check consists of broadcasting the units Device ID and then checking for a 2 secound to see if you get a reply
+      int _Device_ID_Check_Error_Counter = _Device_ID_Check_Checks_Left;
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------
@@ -128,6 +128,7 @@ Network for made to run on the I2C bus using broadcast
       bool _Queue_Is_Empthy = true;
       String _Queue_String = ";"; // ";" is used as seperators betweens the string in the queue
       // int _Queue_Device_ID_Check_Hit = false; // Look below int defined there just here as a reminder
+
 
       // --------------------------------------------- Blink LED ---------------------------------------------
       int _Blink_LED_Blinks_Left = 0;

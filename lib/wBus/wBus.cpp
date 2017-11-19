@@ -308,12 +308,12 @@ int WBus::Device_ID_Check() {
   */
 
 
-
   if (_Device_ID_Check_OK == 0) { // 0 = Not done
+    _Device_ID_Check_Millis_Start_At = millis() + _Device_ID_Check_Millis_Interval;
     if (broadcast(String(_Device_ID) + "DD") != 0) {
       _Device_ID_Check_Error_Counter--;
     }
-    _Device_ID_Check_Millis_Start_At = millis();
+    _Device_ID_Check_Checks_Left--;
     _Device_ID_Check_OK = 3;
     return 3;
   }
@@ -359,7 +359,7 @@ int WBus::Device_ID_Check() {
 
       if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
         _Device_ID_Check_OK = 2;
-        _I2C_Bus_Error = 1; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+        _I2C_Bus_Error = 3; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
         Queue_Clear();
         Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
         // begin(110); // CHAMGE ME - working here
@@ -373,7 +373,7 @@ int WBus::Device_ID_Check() {
 
       if (_Device_ID_Check_Error_Counter <= 0) {
         _Device_ID_Check_OK = 2;
-        _I2C_Bus_Error = 1; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+        _I2C_Bus_Error = 2; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
         Queue_Clear();
         Serial.println("ERROR: All broadcasts failed, assuming I2C bus is down, entering error mode");
         return 2;
@@ -387,8 +387,8 @@ int WBus::Device_ID_Check() {
 
     else { // No reply broadcasting device ID again
 
-      if (_Blink_LED_Millis_Start_At <= millis()) {
-        _Blink_LED_Millis_Start_At = millis() + _Device_ID_Check_Millis_Interval;
+      if (_Device_ID_Check_Millis_Start_At <= millis()) {
+        _Device_ID_Check_Millis_Start_At = millis() + _Device_ID_Check_Millis_Interval;
         if (broadcast(String(_Device_ID) + "DD") != 0) {
           _Device_ID_Check_Error_Counter--;
         }
@@ -430,6 +430,11 @@ void WBus::I2C_BUS_Error(int Error_Number) {
 
   else { // Above 6 is reserved for later errors
     Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
+  }
+
+  if (Blink_LED(true) == 0) { // Blinks the Error LED once when one of the abve mentione errors occures
+    Serial.println("Blink_LED_Start(1)"); // REMOVE ME
+    Blink_LED_Start(1);
   }
 
   return;
@@ -490,6 +495,8 @@ void WBus::Blink_LED_Start(int Number_Of_Blinks, int LED_Pin) {
     return;
   }
 
+  digitalWrite(_Blink_LED_Pin, LOW);
+
   _Blink_LED_Pin = LED_Pin;
 
   _Blink_LED_Blinks_Left = Number_Of_Blinks;
@@ -498,12 +505,20 @@ void WBus::Blink_LED_Start(int Number_Of_Blinks, int LED_Pin) {
 
   pinMode(_Blink_LED_Pin, OUTPUT);
 
+  Blink_LED(false);
+
 } // END MARKER - Blink_LED_Start
 
 void WBus::Blink_LED_Stop() {
   _Blink_LED_Blinks_Left = 0;
   digitalWrite(_Blink_LED_Pin, LOW);
 } // END MARKER - Blink_LED_Stop
+
+int WBus::Blink_LED_Number_Of_Blinks() {
+
+  return _I2C_Bus_Error;
+
+} // END MARKER - Blink_LED_Number_Of_Blinks()
 
 
 // --------------------------------------------- Queue ---------------------------------------------
