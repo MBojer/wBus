@@ -118,8 +118,6 @@ Network for made to run on the I2C bus using broadcast
       unsigned long _Device_ID_Check_Millis_Retry_Interval = 7500; // CHANGE ME - To a usefull number like 30 min (1800000)
 
 
-
-
       // --------------------------------------------- I2C Command Queue ---------------------------------------------
       int _Max_Queue_Length;
       int _Queue_Length = 0;
