@@ -6,6 +6,8 @@
 
 int I2C_Address = 11;
 
+unsigned long Message_Trigger_At = 1500;
+
 WBus wBus(I2C_Address, true, 20, true, 115200);
 
 void I2C_Receive(int HowMany) {
@@ -29,7 +31,8 @@ void Error_Mode(void) {
     wBus.Blink_LED_Start(wBus.I2C_BUS_Error());
   }
 
-  if (String(millis()).indexOf("000") >= 0) {
+  if (Message_Trigger_At > millis()) {
+    Message_Trigger_At = millis() + 1500;
     Serial.println("ERROR MODE");
   }
 
@@ -39,32 +42,24 @@ void Error_Mode(void) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Boot Start");
-  Serial.print("freeMemory()=");
-  Serial.println(freeMemory());
 
   wBus.begin(I2C_Address);
 
   TWAR = (I2C_Address << 1) | 1;
   wBus.onReceive(I2C_Receive);
 
-  Serial.print("freeMemory()=");
-  Serial.println(freeMemory());
   Serial.println("Boot Done");
 }
 
 
 void loop() {
   wBus.Device_ID_Check();
+  wBus.Blink_LED(false);
+
   if (wBus.I2C_BUS_Error() != 0) {
     Error_Mode();
   }
-  wBus.Blink_LED(false);
 
 
-
-  if (String(millis()).indexOf("000") >= 0) {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
-  }
 
 }
