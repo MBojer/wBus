@@ -12,21 +12,15 @@ Network for made to run on the I2C bus using broadcast
   #include "Stream.h"
   #define BUFFER_LENGTH 32
 
-
-
-
   class WBus : public Stream {
 
     public:
 
-
       // --------------------------------------------- Setup ---------------------------------------------
-
       WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed);
 
- 
-      // --------------------------------------------- Wire Functions ---------------------------------------------
 
+      // --------------------------------------------- Wire Functions ---------------------------------------------
       void begin();
       void begin(uint8_t);
       void begin(int);
@@ -50,7 +44,6 @@ Network for made to run on the I2C bus using broadcast
 
 
       // --------------------------------------------- WBus ---------------------------------------------
-
       int Device_ID_Check();
       void I2C_BUS_Error(int Error_Number);
 
@@ -63,7 +56,6 @@ Network for made to run on the I2C bus using broadcast
       int Blink_LED_Number_Of_Blinks();
 
       // --------------------------------------------- Queue ---------------------------------------------
-
       void Queue_Push(String Push_String, bool Add_To_Front_Of_Queue);
       String Queue_Pop();
       String Queue_Peek();
@@ -82,7 +74,6 @@ Network for made to run on the I2C bus using broadcast
 
     private:
       // --------------------------------------------- Two Wire Interface ---------------------------------------------
-
       static uint8_t rxBuffer[BUFFER_LENGTH];
       static uint8_t rxBufferIndex;
       static uint8_t rxBufferLength;
