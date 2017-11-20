@@ -100,34 +100,21 @@ int WBus::broadcast(String Broadcast_String) {
 
   int I2C_BUS_Responce;
 
-  for (int x = 0; x < 3; x++) {
+  beginTransmission(0);  // broadcast to all
+  write(Broadcast_String.c_str());
+  I2C_BUS_Responce = endTransmission();
 
-    beginTransmission(0);  // broadcast to all
-    write(Broadcast_String.c_str());
-    I2C_BUS_Responce = endTransmission();
-
-    if (I2C_BUS_Responce == 0) { // REMOVE ME
-      Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME
-      return 0;
-    } // REMOVE ME
-
-
-    else if (I2C_BUS_Responce != 0) { // Returns if 0  -  0 = No error
-      if (_Log_To_Serial == true) {
-        Serial.println(I2C_BUS_Error_To_Text(I2C_BUS_Responce));
-      }
-      return I2C_BUS_Responce;
-    }
-
-    else { // REMOVE ME
-      Serial.println("Retransmitting: " + Broadcast_String); // REMOVE ME
-    } // REMOVE ME
-
-    Serial.println("x: " + String(x));
-    delay(250);
+  if (I2C_BUS_Responce != 0) {
+    I2C_BUS_Error_To_Text(I2C_BUS_Responce);
+    return I2C_BUS_Responce;
   }
 
+  if (I2C_BUS_Responce == 0) { // REMOVE ME - Cleanup
+    Serial.println(String("Send: ") + String(Broadcast_String)); // REMOVE ME - Cleanup
+  } // REMOVE ME - Cleanup
+
   return 0;
+
 } // End marker for Broadcast
 
 uint8_t WBus::endTransmission(void) {
