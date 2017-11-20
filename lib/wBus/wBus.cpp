@@ -111,9 +111,11 @@ int WBus::broadcast(String Broadcast_String) {
       return 0;
     } // REMOVE ME
 
-    I2C_BUS_Error(I2C_BUS_Responce);
 
-    if (I2C_BUS_Responce != 0) { // Returns if 0  -  0 = No error
+    else if (I2C_BUS_Responce != 0) { // Returns if 0  -  0 = No error
+      if (_Log_To_Serial == true) {
+        Serial.println(I2C_BUS_Error_To_Text(I2C_BUS_Responce));
+      }
       return I2C_BUS_Responce;
     }
 
@@ -402,42 +404,51 @@ int WBus::Device_ID_Check() {
 
 } // END MARKER - Device_ID
 
-void WBus::I2C_BUS_Error(int Error_Number) {
+int WBus::I2C_BUS_Error() {
+  return _I2C_Bus_Error;
+}
+
+String WBus::I2C_BUS_Error_To_Text(int Error_Number) {
+
+  String Error_Text;
 
   if (Error_Number == 1) { // represents an Error not useing the address just to be safe
-    Serial.println("I2C Error 1: Data too long to fit in transmit buffer");
+    Error_Text = "I2C Error 1: Data too long to fit in transmit buffer";
   }
 
   else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
-    Serial.println("I2C Error 2: Received NACK on transmit of address");
+    Error_Text = "I2C Error 2: Received NACK on transmit of address";
   }
 
   else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
-    Serial.println("I2C Error 3: Received NACK on transmit of data");
+    Error_Text = "I2C Error 3: Received NACK on transmit of data";
   }
 
   else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
-    Serial.println(String("I2C BUS error on address: ") + String(_Device_ID));
+    Error_Text = "I2C BUS error on address: " + String(_Device_ID);
   }
 
   else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
-    Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master");
+    Error_Text = "I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master";
   }
 
   else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
-    Serial.println("I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent");
+    Error_Text = "I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent";
   }
 
   else { // Above 6 is reserved for later errors
-    Serial.println("I2C Error Mode Acrive: Error number " + Error_Number);
+    Error_Text = "I2C Error Mode Acrive: Error number " + Error_Number;
   }
 
   if (Blink_LED(true) == 0) { // Blinks the Error LED once when one of the abve mentione errors occures
-    Serial.println("Blink_LED_Start(1)"); // REMOVE ME
     Blink_LED_Start(1);
   }
 
-  return;
+  if (_Log_To_Serial == true) {
+    Serial.println(Error_Text);
+  }
+
+  return Error_Text;
 
 } // End Marker - I2C_Error_Print
 
@@ -514,11 +525,6 @@ void WBus::Blink_LED_Stop() {
   digitalWrite(_Blink_LED_Pin, LOW);
 } // END MARKER - Blink_LED_Stop
 
-int WBus::Blink_LED_Number_Of_Blinks() {
-
-  return _I2C_Bus_Error;
-
-} // END MARKER - Blink_LED_Number_Of_Blinks()
 
 
 // --------------------------------------------- Queue ---------------------------------------------

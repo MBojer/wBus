@@ -45,7 +45,8 @@ Network for made to run on the I2C bus using broadcast
 
       // --------------------------------------------- WBus ---------------------------------------------
       int Device_ID_Check();
-      void I2C_BUS_Error(int Error_Number);
+      int I2C_BUS_Error();
+      String I2C_BUS_Error_To_Text(int Error_Number);
 
 
       // --------------------------------------------- Blink LED ---------------------------------------------
@@ -53,7 +54,7 @@ Network for made to run on the I2C bus using broadcast
       void Blink_LED_Start(int Number_Of_Blinks);
       void Blink_LED_Start(int Number_Of_Blinks, int LED_Pin);
       void Blink_LED_Stop();
-      int Blink_LED_Number_Of_Blinks();
+
 
       // --------------------------------------------- Queue ---------------------------------------------
       void Queue_Push(String Push_String, bool Add_To_Front_Of_Queue);

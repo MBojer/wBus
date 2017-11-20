@@ -24,7 +24,7 @@ void I2C_Receive(int HowMany) {
 
 void Error_Mode(void) {
   if (wBus.Blink_LED(true) == 0) {
-    wBus.Blink_LED_Start(wBus.Blink_LED_Number_Of_Blinks());
+    wBus.Blink_LED_Start(wBus.I2C_BUS_Error());
   }
 
   if (String(millis()).indexOf("000") <= 0) {
@@ -59,7 +59,7 @@ void setup() {
 void loop() {
   wBus.Device_ID_Check();
   wBus.Blink_LED(false);
-  if (wBus.Blink_LED_Number_Of_Blinks() != 0) {
+  if (wBus.I2C_BUS_Error() != 0) {
     Error_Mode();
   }
 
