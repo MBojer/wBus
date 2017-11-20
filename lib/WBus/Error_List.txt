@@ -1,5 +1,10 @@
-Error Blink Codes:
+---------------------------------- Error Blink Codes ----------------------------------
 
-1 = I2C_BUS_Error()
-2 = All broadcasts failed assuming bus not working
-3 = Duplicate Device ID
+      1 = I2C_BUS_Error()
+      2 = All broadcasts failed assuming bus not working
+      3 = Duplicate Device ID
+
+
+---------------------------------- I2C_BUS_Error() ----------------------------------
+
+      

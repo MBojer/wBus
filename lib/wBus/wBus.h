@@ -105,13 +105,19 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- Device ID Checkd ---------------------------------------------
       int _Device_ID_Check_OK = 0; // 0 = Not done  -  1 = Done and OK  -  2 = Failed  -  3 = Waiting for reply
 
+      #define _Device_ID_Check_Checks_Default 6
+      int _Device_ID_Check_Checks_Left = _Device_ID_Check_Checks_Default; // A check consists of broadcasting the units Device ID and then checking for a 2 secound to see if you get a reply
+      int _Device_ID_Check_Error_Counter = _Device_ID_Check_Checks_Default;
+
       bool _Queue_Device_ID_Check_Hit;
 
       unsigned long _Device_ID_Check_Millis_Start_At = 0;
       unsigned long _Device_ID_Check_Millis_Interval = 2500;
 
-      int _Device_ID_Check_Checks_Left = 6; // A check consists of broadcasting the units Device ID and then checking for a 2 secound to see if you get a reply
-      int _Device_ID_Check_Error_Counter = _Device_ID_Check_Checks_Left;
+      unsigned long _Device_ID_Check_Millis_Retry_At = 0;
+      unsigned long _Device_ID_Check_Millis_Retry_Interval = 7500; // CHANGE ME - To a usefull number like 30 min (1800000)
+
+
 
 
       // --------------------------------------------- I2C Command Queue ---------------------------------------------

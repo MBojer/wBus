@@ -340,7 +340,6 @@ int WBus::Device_ID_Check() {
       }
 
       else { // Clears the Queue of DD
-        Serial.println("Clear queue"); // REMOVE ME
         Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
       } // Clear queue for Device ID requests
 
@@ -352,6 +351,15 @@ int WBus::Device_ID_Check() {
   } // END MARKER - else if (_Device_ID_Check_OK == 1)
 
   else if (_Device_ID_Check_OK == 2) { // 2 = Failed
+
+    if (_Device_ID_Check_Millis_Retry_At < millis()) {
+      _Device_ID_Check_OK = 0;
+      _I2C_Bus_Error = 0; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+      _Device_ID_Check_Checks_Left = _Device_ID_Check_Checks_Default;
+      Serial.println("Retrying Device ID check");
+      return 0;
+    }
+
     return 2;
   }
 
@@ -376,6 +384,7 @@ int WBus::Device_ID_Check() {
       if (_Device_ID_Check_Error_Counter <= 0) {
         _Device_ID_Check_OK = 2;
         _I2C_Bus_Error = 2; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+        _Device_ID_Check_Millis_Retry_At = millis() + _Device_ID_Check_Millis_Retry_Interval; // Sets the trigger for the retry
         Queue_Clear();
         Serial.println("ERROR: All broadcasts failed, assuming I2C bus is down, entering error mode");
         return 2;
