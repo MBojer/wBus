@@ -1,0 +1,39 @@
+{
+    "description": "A spinoff of the Wire. This library allows you to communicate with I2C and Two Wire Interface devices, and control each step of any I2C transaction.", 
+    "repository": {
+        "url": "https://github.com/thexeno/HardWire-Arduino-Library", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": false, 
+            "name": "Enrico Sanino", 
+            "url": null, 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "communication"
+    ], 
+    "id": 1437, 
+    "name": "HardWire", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "1.0.2a", 
+    "homepage": null
+}

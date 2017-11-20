@@ -1,0 +1,28 @@
+{
+    "name": "Brzo I2C", 
+    "repository": {
+        "url": "https://github.com/pasko-zh/brzo_i2c.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "1.3.1", 
+    "authors": [
+        {
+            "url": null, 
+            "maintainer": false, 
+            "email": "pascal@kurtansky.ch", 
+            "name": "Pascal Kurtansky"
+        }
+    ], 
+    "keywords": [
+        "i2c", 
+        "esp8266"
+    ], 
+    "id": 335, 
+    "description": "Brzo I2C is a fast I2C Implementation written in Assembly for the esp8266"
+}
