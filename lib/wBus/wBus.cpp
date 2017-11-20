@@ -57,6 +57,9 @@ void (*WBus::user_onRequest)(void);
 void (*WBus::user_onReceive)(int);
 
 void WBus::begin(void) {
+
+  TWAR = (_Device_ID << 1) | 1; // To enable incomming broadcasts - i think!
+
   rxBufferIndex = 0;
   rxBufferLength = 0;
 
@@ -225,7 +228,8 @@ void WBus::flush(void) {
 
 void WBus::onReceive( void (*function)(int) ) {
   // sets function called on slave write
-  user_onReceive = function;
+  // user_onReceive = function;
+  receiveTest();
 }
 
 void WBus::onReceiveService(uint8_t* inBytes, int numBytes) {
@@ -282,6 +286,19 @@ void WBus::pullup(bool Activate) { // Enable/Disable Internal PullUp Resistors
   }
 }
 
+void WBus::receiveTest() {
+  String I2C_Receive_Data_Test;
+
+  while (available()) {
+    I2C_Receive_Data_Test += (char)read();
+  }
+
+  Queue_Push(I2C_Receive_Data_Test, false);
+
+  Serial.print("Resived: ");
+  Serial.println(I2C_Receive_Data_Test);
+
+}
 
 
 // --------------------------------------------- WBus ---------------------------------------------

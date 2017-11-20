@@ -11,7 +11,7 @@ unsigned long Message_Trigger_At = 1500;
 WBus wBus(I2C_Address, true, 20, true, 115200);
 
 void I2C_Receive(int HowMany) {
-  String I2C_Receive_Data; // UNCOMMENT ME LATER - Used to make sure that the I2C_Receive_Data gets cleared every time
+  String I2C_Receive_Data;
 
   while (wBus.available()) {
     I2C_Receive_Data += (char)wBus.read();
@@ -45,8 +45,8 @@ void setup() {
 
   wBus.begin(I2C_Address);
 
-  TWAR = (I2C_Address << 1) | 1;
-  wBus.onReceive(I2C_Receive);
+  // TWAR = (I2C_Address << 1) | 1;
+  // wBus.onReceive(wBus.receiveTest);
 
   Serial.println("Boot Done");
 }

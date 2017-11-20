@@ -39,6 +39,7 @@ Network for made to run on the I2C bus using broadcast
       void onReceive( void (*)(int) );
       void onRequest( void (*)(void) );
       void pullup(bool Activate);
+      void receiveTest();
 
       using Print::write; // Change ME / REMOVE ME
 
