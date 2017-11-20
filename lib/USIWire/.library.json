@@ -1,0 +1,39 @@
+{
+    "description": "USI based TWI/I2C library for Arduino", 
+    "repository": {
+        "url": "https://github.com/puuu/USIWire", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": true, 
+            "name": "puuu", 
+            "url": null, 
+            "email": "puuu@users.noreply.github.com"
+        }
+    ], 
+    "keywords": [
+        "communication"
+    ], 
+    "id": 1567, 
+    "name": "USIWire", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "0.1.0", 
+    "homepage": null
+}
