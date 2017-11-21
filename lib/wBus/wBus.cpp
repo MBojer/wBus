@@ -683,11 +683,6 @@ void WBus::Boot_Message() { // Displays a boot message if included
 
     else { // Defaults to 115200 if the _Serial_Speed number seems off
       Serial.begin(115200);
-
-      Serial.println(_Serial_Speed);
-      Serial.println((_Serial_Speed / 300));
-      Serial.println("Serial Speed seems to be off defaulting to 115200");
-
     }
 
     SerialPrint("");
@@ -720,9 +715,7 @@ void WBus::SerialPrint(int Print_Int) {
 }
 
 void WBus::SerialPrint(String Print_String) {
-  if (_Log_To_Serial == false) {
-      return;
+  if (_Log_To_Serial == true) {
+    Serial.println(Print_String);
   }
-
-  Serial.println(Print_String);
 }
