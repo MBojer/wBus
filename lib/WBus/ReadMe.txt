@@ -15,3 +15,6 @@
       5 = I2C Bus - Timeout while trying to become Bus Master
       6 = I2C Bus - Timeout while waiting for data to be sent
       7+ = Unknown error
+
+
+---------------------------------- Registry  ----------------------------------
