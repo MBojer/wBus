@@ -528,7 +528,7 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
     return;
   }
 
-  if (Push_String.indexOf((String(_Device_ID) + "DD")) <= 0) {
+  if (Push_String.indexOf((String(_Device_ID) + "DD")) <= 0) { // Duplicate Device_ID broadcast
     _Queue_Device_ID_Check_Hit = true;
   }
 
