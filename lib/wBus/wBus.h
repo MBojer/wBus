@@ -71,7 +71,8 @@ Network for made to run on the I2C bus using broadcast
       // --------------------------------------------- Misc ---------------------------------------------
       void Boot_Message();
       void zzzZZZ();
-
+      void SerialPrint(String Print_String);
+      void SerialPrint(int Print_Int);
 
 
     private:
@@ -135,8 +136,6 @@ Network for made to run on the I2C bus using broadcast
       unsigned long _Blink_LED_Millis_Interval_Break = 1500;
 
       int _Blink_LED_Pin = 99; // 99 = zzzZZZ() will not turn on error LED before sleep
-
-
 
   };
 

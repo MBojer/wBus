@@ -344,7 +344,7 @@ int WBus::Device_ID_Check() {
       _Device_ID_Check_OK = 0;
       _I2C_Bus_Error = 0; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
       _Device_ID_Check_Checks_Left = _Device_ID_Check_Checks_Default;
-      Serial.println("Retrying Device ID check");
+      SerialPrint("Retrying Device ID check");
       return 0;
     }
 
@@ -359,9 +359,9 @@ int WBus::Device_ID_Check() {
       _Device_ID_Check_OK = 2;
       _I2C_Bus_Error = 3; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
       Queue_Clear();
-      Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+      SerialPrint("ERROR: Duplicate Device ID found, going into Error Mode");
       // begin(110); // CHAMGE ME - working here
-      // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
+      // SerialPrint("Changinb to BUS address 110"); // CHAMGE ME
       return 2;
     } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
 
@@ -372,11 +372,11 @@ int WBus::Device_ID_Check() {
         _I2C_Bus_Error = 2; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
         _Device_ID_Check_Millis_Retry_At = millis() + _Device_ID_Check_Millis_Retry_Interval; // Sets the trigger for the retry
         Queue_Clear();
-        Serial.println("ERROR: All broadcasts failed, assuming I2C bus is down, entering error mode");
+        SerialPrint("ERROR: All broadcasts failed, assuming I2C bus is down, entering error mode");
         return 2;
       }
 
-      Serial.println("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
+      SerialPrint("Device ID: " + String(_Device_ID) + " Check Compleate, ID not in use");
       _Device_ID_Check_OK = 1;
       Queue_Search_Pop("DD", true); // Clears the queue for any DD messages
       return 1;
@@ -439,9 +439,7 @@ String WBus::I2C_BUS_Error_To_Text(int Error_Number) {
     Blink_LED_Start(1);
   }
 
-  if (_Log_To_Serial == true) {
-    Serial.println(Error_Text);
-  }
+  SerialPrint(Error_Text);
 
   return Error_Text;
 
@@ -547,7 +545,7 @@ void WBus::Queue_Push(String Push_String, bool Add_To_Front_Of_Queue) {
   }
 
   if (_Queue_Length >= _Max_Queue_Length) {
-    Serial.println("ERROR: Max_Queue_Length reached, clearing command queue"); // CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    SerialPrint("ERROR: Max_Queue_Length reached, clearing command queue"); // CHANGE ME - Add I2C ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     _Queue_String = ";";
     _Queue_Length = 0;
     _Queue_Is_Empthy = true;
@@ -676,22 +674,32 @@ String WBus::Queue_Search_Pop(String Search_String, bool Delete_All_Matches) {
 
 void WBus::Boot_Message() { // Displays a boot message if included
 
-  if (_Log_To_Serial == true && (Serial)) {
+  if (_Log_To_Serial == true) {
 
-    if (_Serial_Speed != 0) {
+    // if (_Serial_Speed != 0 && (_Serial_Speed % 300) <= 1 && (_Serial_Speed % 300) >= 16) {
+    if (_Serial_Speed != 0 && (_Serial_Speed / 300) >= 1  && (_Serial_Speed / 300) <= 3072) {
       Serial.begin(_Serial_Speed);
     }
 
-    Serial.println("");
-    Serial.println("Including wBus v0.1");
-    Serial.println("Using BUS Address: " + String(_Device_ID));
+    else { // Defaults to 115200 if the _Serial_Speed number seems off
+      Serial.begin(115200);
+
+      Serial.println(_Serial_Speed);
+      Serial.println((_Serial_Speed / 300));
+      Serial.println("Serial Speed seems to be off defaulting to 115200");
+
+    }
+
+    SerialPrint("");
+    SerialPrint("Including wBus v0.1");
+    SerialPrint("Using BUS Address: " + String(_Device_ID));
   }
 } // End marker for Boot_Message
 
 void WBus::zzzZZZ() {
 
   if (_Log_To_Serial == true) {
-    Serial.println("Nothing to do going to bed, wake me when you need me :-P");
+    SerialPrint("Nothing to do going to bed, wake me when you need me :-P");
     Serial.end();
   }
 
@@ -706,3 +714,15 @@ void WBus::zzzZZZ() {
 	sleep_mode();
 
 } // END MARKER - zzzZZZ
+
+void WBus::SerialPrint(int Print_Int) {
+  SerialPrint(String(Print_Int));
+}
+
+void WBus::SerialPrint(String Print_String) {
+  if (_Log_To_Serial == false) {
+      return;
+  }
+
+  Serial.println(Print_String);
+}

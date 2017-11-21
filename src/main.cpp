@@ -45,7 +45,7 @@ void Error_Mode(void) {
 
 
 void setup() {
-  Serial.begin(115200);
+  wBus.Boot_Message();
   Serial.println("Boot Start");
 
   wBus.begin(I2C_Address);
