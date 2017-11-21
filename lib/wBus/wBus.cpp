@@ -333,7 +333,7 @@ int WBus::Device_ID_Check() {
 
   else if (_Device_ID_Check_OK == 2) { // 2 = Failed
 
-    if (_Device_ID_Check_Millis_Retry_At < millis()) { // Starts the retry
+    if (_Device_ID_Check_Millis_Retry_At < millis() && _I2C_Bus_Error != 3) { // Starts the retry - If NO duplicate Device ID
       _Device_ID_Check_OK = 0;
       _I2C_Bus_Error = 0; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
       _Device_ID_Check_Checks_Left = _Device_ID_Check_Checks_Default;
