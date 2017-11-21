@@ -21,6 +21,13 @@ extern "C" {
 #include "MemoryFree.h" // REMOVE ME
 
 
+// --------------------------------------------- WBus - zzzZZZ ---------------------------------------------
+
+// #include <avr/interrupt.h> // Dont thinkg this is needed
+#include <avr/power.h>
+#include <avr/sleep.h>
+
+
 // --------------------------------------------- Setup ---------------------------------------------
 
 WBus::WBus(int I2C_Device_ID, bool I2C_Internal_Pullup, int Max_Queue_Length, bool Log_To_Serial, long Serial_Speed) {
@@ -400,27 +407,27 @@ String WBus::I2C_BUS_Error_To_Text(int Error_Number) {
 
   String Error_Text;
 
-  if (Error_Number == 1) { // represents an Error not useing the address just to be safe
+  if (Error_Number == 1) {
     Error_Text = "I2C Error 1: Data too long to fit in transmit buffer";
   }
 
-  else if (Error_Number == 2) { // represents an Error not useing the address just to be safe
+  else if (Error_Number == 2) {
     Error_Text = "I2C Error 2: Received NACK on transmit of address";
   }
 
-  else if (Error_Number == 3) { // represents an Error not useing the address just to be safe
+  else if (Error_Number == 3) {
     Error_Text = "I2C Error 3: Received NACK on transmit of data";
   }
 
-  else if (Error_Number == 4) { // represents an Error not useing the address just to be safe
+  else if (Error_Number == 4) {
     Error_Text = "I2C BUS error on address: " + String(_Device_ID);
   }
 
-  else if (Error_Number == 5) { // represents an Error not useing the address just to be safe
+  else if (Error_Number == 5) {
     Error_Text = "I2C Error Mode Acrive: I2C Bus - Timeout while trying to become Bus Master";
   }
 
-  else if (Error_Number == 6) { // represents an Error not useing the address just to be safe
+  else if (Error_Number == 6) {
     Error_Text = "I2C Error Mode Acrive: I2C Bus - Timeout while waiting for data to be sent";
   }
 
@@ -680,3 +687,22 @@ void WBus::Boot_Message() { // Displays a boot message if included
     Serial.println("Using BUS Address: " + String(_Device_ID));
   }
 } // End marker for Boot_Message
+
+void WBus::zzzZZZ() {
+
+  if (_Log_To_Serial == true) {
+    Serial.println("Nothing to do going to bed, wake me when you need me :-P");
+    Serial.end();
+  }
+
+  if (_Blink_LED_Pin != 99) {
+    digitalWrite(_Blink_LED_Pin, HIGH);
+  }
+
+  delay(1000);
+
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	sleep_enable();
+	sleep_mode();
+
+} // END MARKER - zzzZZZ

@@ -26,6 +26,9 @@ void I2C_Receive(int HowMany) {
 
 
 void Error_Mode(void) {
+
+  wBus.zzzZZZ();
+
   if (wBus.Blink_LED(true) == 0) {
     wBus.Blink_LED_Start(wBus.I2C_BUS_Error());
   }
@@ -34,6 +37,8 @@ void Error_Mode(void) {
 
     Message_Trigger_At = millis() + 1500;
     Serial.println("ERROR MODE");
+
+    delay(2000);
   }
 
 } // END MARKER - Error Mode
@@ -56,7 +61,7 @@ void loop() {
   wBus.Device_ID_Check();
   wBus.Blink_LED(false);
 
-  if (wBus.I2C_BUS_Error() != 0) {
+  if (wBus.I2C_BUS_Error() != 0 && 3) {
     Error_Mode();
   }
 

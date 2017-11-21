@@ -7,4 +7,11 @@
 
 ---------------------------------- I2C_BUS_Error() ----------------------------------
 
-      
+      0 = OK
+      1 = Data too long to fit in transmit buffer
+      2 = Received NACK on transmit of address
+      3 = Received NACK on transmit of data
+      4 = I2C BUS error on address: "_Device_ID"
+      5 = I2C Bus - Timeout while trying to become Bus Master
+      6 = I2C Bus - Timeout while waiting for data to be sent
+      7+ = Unknown error
