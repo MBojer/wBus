@@ -309,37 +309,31 @@ int WBus::Device_ID_Check() {
 
   else if (_Device_ID_Check_OK == 1) { // 1 = Done and OK
 
-    if (_Queue_Device_ID_Check_Hit == true) {
+    if (_Queue_Device_ID_Check_Hit == true) { // Another device send duplicate Device ID
       /*
       Command_Queue_Push have put (Device_ID)"DD" (Device ID check request) in the Queue.
 
-      Checking if the device id matches this units Device ID and if so replied (Device_ID)"DD"
-
-      (Device_ID)"DD" will make the other device enter error state and change ID to "110"
+      (Device_ID)"DD" will make the other device enter error state and change ID to "110" - NOT IMPLAMENTED
       */
 
-      if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Another device send duplicate Device ID
-        if (broadcast(String(_Device_ID) + "DD") != 0) {
-          _Device_ID_Check_Error_Counter--;
-        }
+      broadcast(String(_Device_ID) + "DD");
 
-        // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
-      }
-
-      else { // Clears the Queue of DD
-        Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
-      } // Clear queue for Device ID requests
+      // CHANGE ME - ADD I2C Error Braodcast on duplicate hit
 
       _Queue_Device_ID_Check_Hit = false;
-      return 1;
+
     } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
+
+    else { // Clears the Queue of DD
+      Queue_Search_Pop("DD", true); // Clears the queue for device id check requests
+    } // Clear queue for Device ID requests
 
     return 1;
   } // END MARKER - else if (_Device_ID_Check_OK == 1)
 
   else if (_Device_ID_Check_OK == 2) { // 2 = Failed
 
-    if (_Device_ID_Check_Millis_Retry_At < millis()) {
+    if (_Device_ID_Check_Millis_Retry_At < millis()) { // Starts the retry
       _Device_ID_Check_OK = 0;
       _I2C_Bus_Error = 0; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
       _Device_ID_Check_Checks_Left = _Device_ID_Check_Checks_Default;
@@ -354,16 +348,14 @@ int WBus::Device_ID_Check() {
 
     if (_Queue_Device_ID_Check_Hit == true) { // Queue_Push added "DD" to the queue, "DD" Symbolizes and Device_ID check
 
-      if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
-        _Device_ID_Check_OK = 2;
-        _I2C_Bus_Error = 3; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
-        Queue_Clear();
-        Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
-        // begin(110); // CHAMGE ME - working here
-        // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
-        return 2;
-      }
-
+      // if (Queue_Search_Pop((String(_Device_ID) + "DD"), true) != ";") { // Device ID Check failed going to error state
+      _Device_ID_Check_OK = 2;
+      _I2C_Bus_Error = 3; // if _I2C_Bus_Error = 1 Queue_Push will not add any data
+      Queue_Clear();
+      Serial.println("ERROR: Duplicate Device ID found, going into Error Mode");
+      // begin(110); // CHAMGE ME - working here
+      // Serial.println("Changinb to BUS address 110"); // CHAMGE ME
+      return 2;
     } // END MARKER - if (_Queue_Device_ID_Check_Hit == true)
 
     else if (_Device_ID_Check_Checks_Left <= 0) { // Done no reply on "DD" assuming device id unique
@@ -398,7 +390,7 @@ int WBus::Device_ID_Check() {
 
   } // END MARKER - else
 
-} // END MARKER - Device_ID
+} // END MARKER - Device_ID - Ignore this warning
 
 int WBus::I2C_BUS_Error() {
   return _I2C_Bus_Error;

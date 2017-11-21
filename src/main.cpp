@@ -4,14 +4,14 @@
 
 #include <MemoryFree.h> // REMOVE ME
 
-int I2C_Address = 11;
+int I2C_Address = 12;
 
 unsigned long Message_Trigger_At = 1500;
 
 WBus wBus(I2C_Address, true, 20, true, 115200);
 
 void I2C_Receive(int HowMany) {
-  String I2C_Receive_Data; // UNCOMMENT ME LATER - Used to make sure that the I2C_Receive_Data gets cleared every time
+  String I2C_Receive_Data;
 
   while (wBus.available()) {
     I2C_Receive_Data += (char)wBus.read();
@@ -19,9 +19,8 @@ void I2C_Receive(int HowMany) {
 
   wBus.Queue_Push(I2C_Receive_Data, false);
 
-  Serial.print("Resived: ");
-  Serial.println(I2C_Receive_Data);
-  I2C_Receive_Data = "";
+  Serial.print("Resived: "); // REMOVE ME
+  Serial.println(I2C_Receive_Data); // REMOVE ME
 
 } //End marker for I2C_Receive
 
@@ -31,7 +30,8 @@ void Error_Mode(void) {
     wBus.Blink_LED_Start(wBus.I2C_BUS_Error());
   }
 
-  if (Message_Trigger_At > millis()) {
+  if (Message_Trigger_At < millis()) {
+
     Message_Trigger_At = millis() + 1500;
     Serial.println("ERROR MODE");
   }
@@ -59,6 +59,13 @@ void loop() {
   if (wBus.I2C_BUS_Error() != 0) {
     Error_Mode();
   }
+
+  // if (Message_Trigger_At < millis()) {
+  //   Message_Trigger_At = millis() + 1500;
+  //   Serial.println("OK");
+  //   Serial.println(wBus.Queue_Peek_Queue());
+  // }
+
 
 
 
