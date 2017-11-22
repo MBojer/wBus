@@ -43,6 +43,13 @@ Network for made to run on the I2C bus using broadcast
       using Print::write; // Change ME / REMOVE ME
 
 
+      // --------------------------------------------- Registry ---------------------------------------------
+
+      // --------------------------------------------- I2C_Relay ---------------------------------------------
+      void I2C_Relay();
+      void I2C_Relay_Setup(int Relay_Begin_Pin, int Relay_End_Pin);
+
+
       // --------------------------------------------- WBus ---------------------------------------------
       int Device_ID_Check();
       int I2C_BUS_Error();
@@ -136,6 +143,16 @@ Network for made to run on the I2C bus using broadcast
       unsigned long _Blink_LED_Millis_Interval_Break = 1500;
 
       int _Blink_LED_Pin = 99; // 99 = zzzZZZ() will not turn on error LED before sleep
+
+
+      // --------------------------------------------- Registry ---------------------------------------------
+      String Avalible_Devices;
+
+      // --------------------------------------------- I2C_Relay ---------------------------------------------
+      int _Relay_Begin_Pin = 99;
+      int _Relay_End_Pin = 99;
+
+
 
   };
 
